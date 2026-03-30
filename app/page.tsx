@@ -162,11 +162,13 @@ export default function HomePage() {
 
         <div className="contentGrid">
           <section className="mainPanel">
-            <div className="turntableWrap">
+            <div className={`turntableWrap ${isPlaying ? 'turntableActive' : ''}`}>
+              <div className="ring ring0" />
               <div className="ring ring1" />
               <div className="ring ring2" />
               <div className="ring ring3" />
               <div className="playerLabel">DEMO PLAYER</div>
+              <div className="centerGlow" />
               <div className="centerHub" />
               <div className="progressTrack">
                 <div className="progressFill" style={{ width: isPlaying ? '72%' : '28%' }} />
@@ -288,11 +290,29 @@ export default function HomePage() {
           position: absolute;
           border-radius: 999px;
           border: 1px solid rgba(180, 194, 255, 0.14);
+          transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
         }
 
+        .ring0 { inset: 2.5%; border-color: rgba(180, 194, 255, 0.12); }
         .ring1 { inset: 8%; }
-        .ring2 { inset: 20%; }
+        .ring2 { inset: 20%; border-color: rgba(180, 194, 255, 0.12); }
         .ring3 { inset: 31%; border-color: rgba(180, 194, 255, 0.1); }
+
+        .centerGlow {
+          position: absolute;
+          inset: 36%;
+          border-radius: 999px;
+          background: radial-gradient(circle, rgba(113,141,255,0.10) 0%, rgba(113,141,255,0.04) 42%, rgba(113,141,255,0.0) 72%);
+          opacity: 0.55;
+          transform: scale(1);
+          transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .turntableActive .ring0 { animation: bfhaPulseOuter 1.45s ease-in-out infinite; }
+        .turntableActive .ring1 { animation: bfhaPulseA 1.15s ease-in-out infinite; }
+        .turntableActive .ring2 { animation: bfhaPulseB 1.05s ease-in-out infinite; }
+        .turntableActive .ring3 { animation: bfhaPulseC 0.95s ease-in-out infinite; }
+        .turntableActive .centerGlow { animation: bfhaGlow 1.2s ease-in-out infinite; }
 
         .playerLabel {
           position: absolute;
@@ -404,11 +424,13 @@ export default function HomePage() {
           display: block;
           width: 100%;
           text-align: center;
-          font-size: 10px;
-          line-height: 1.1;
-          letter-spacing: 0.14em;
+          font-size: 8px;
+          line-height: 1.05;
+          letter-spacing: 0.08em;
           color: #88a8ff;
           white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .miniOptionActive .miniPad {
@@ -457,6 +479,31 @@ export default function HomePage() {
 
         .buttonWide {
           grid-column: 1 / -1;
+        }
+
+        @keyframes bfhaPulseOuter {
+          0%, 100% { transform: scale(1); opacity: 0.7; box-shadow: 0 0 0 rgba(113,141,255,0); }
+          50% { transform: scale(1.007); opacity: 1; box-shadow: 0 0 24px rgba(113,141,255,0.10); }
+        }
+
+        @keyframes bfhaPulseA {
+          0%, 100% { transform: scale(1); opacity: 0.72; box-shadow: 0 0 0 rgba(113,141,255,0); }
+          50% { transform: scale(1.012); opacity: 1; box-shadow: 0 0 28px rgba(113,141,255,0.12); border-color: rgba(150, 173, 255, 0.42); }
+        }
+
+        @keyframes bfhaPulseB {
+          0%, 100% { transform: scale(1); opacity: 0.72; box-shadow: 0 0 0 rgba(113,141,255,0); }
+          50% { transform: scale(1.015); opacity: 1; box-shadow: 0 0 20px rgba(113,141,255,0.10); border-color: rgba(150, 173, 255, 0.36); }
+        }
+
+        @keyframes bfhaPulseC {
+          0%, 100% { transform: scale(1); opacity: 0.7; box-shadow: 0 0 0 rgba(113,141,255,0); }
+          50% { transform: scale(1.018); opacity: 0.96; box-shadow: 0 0 16px rgba(113,141,255,0.08); border-color: rgba(150, 173, 255, 0.30); }
+        }
+
+        @keyframes bfhaGlow {
+          0%, 100% { transform: scale(1); opacity: 0.45; }
+          50% { transform: scale(1.06); opacity: 0.72; }
         }
 
         @media (max-width: 860px) {
@@ -526,8 +573,8 @@ export default function HomePage() {
           }
 
           .miniOptionText {
-            font-size: 9px;
-            letter-spacing: 0.1em;
+            font-size: 7px;
+            letter-spacing: 0.04em;
           }
 
           .actionsPanel {
