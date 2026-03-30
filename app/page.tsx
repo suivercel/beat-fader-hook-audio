@@ -26,7 +26,7 @@ const MEGURI_VALUES: Meguri[] = ['SHORT', 'MID', 'LONG'];
 
 const NORI_VALUES: Nori[] = ['STEP', 'PUSH', 'SWING', 'BREAK'];
 const KAZARI_VALUES: Kazari[] = ['NONE', 'LIGHT', 'MID', 'RICH'];
-const KIZAMI_VALUES: Kizami[] = ['LOW', 'MID', 'HIGH'];
+const KIZAMI_VALUES: Kizami[] = ['LOW', 'MID', 'HIGH', 'PEAK'];
 const IRO_VALUES: Iro[] = ['CLEAR', 'COOL', 'HEAVY', 'MIST'];
 
 function nextValue<T extends string>(current: T, values: readonly T[]): T {
@@ -55,7 +55,8 @@ function MiniToggleGroup<T extends string>({ label, values, activeValue, onSelec
               className={`miniOption ${active ? 'miniOptionActive' : ''}`}
               onClick={() => onSelect(value)}
             >
-              <span className="miniOptionInner">{value}</span>
+              <span className="miniPad" />
+              <span className="miniOptionText">{value}</span>
             </button>
           );
         })}
@@ -376,34 +377,48 @@ export default function HomePage() {
         }
 
         .miniOption {
-          border: 1px solid rgba(255,255,255,0.08);
-          background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.018));
+          border: 0;
+          background: transparent;
           color: #cfd3dc;
-          border-radius: 12px;
           padding: 0;
           min-height: 0;
-          aspect-ratio: 1 / 1;
           display: flex;
+          flex-direction: column;
           align-items: center;
-          justify-content: center;
+          justify-content: flex-start;
+          gap: 6px;
+          transition: transform 0.15s ease;
+        }
+
+        .miniPad {
+          width: 100%;
+          aspect-ratio: 1 / 1;
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.08);
+          background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.018));
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -16px 24px rgba(0,0,0,0.22), 0 1px 0 rgba(255,255,255,0.02);
-          transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+          transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
         }
 
-        .miniOptionInner {
+        .miniOptionText {
           display: block;
-          padding: 8px;
-          font-size: 11px;
-          line-height: 1.15;
-          letter-spacing: 0.16em;
+          width: 100%;
           text-align: center;
+          font-size: 10px;
+          line-height: 1.1;
+          letter-spacing: 0.14em;
+          color: #88a8ff;
+          white-space: nowrap;
         }
 
-        .miniOptionActive {
-          color: #95b7ff;
+        .miniOptionActive .miniPad {
           border-color: rgba(113, 141, 255, 0.48);
           background: linear-gradient(180deg, rgba(113, 141, 255, 0.22), rgba(113, 141, 255, 0.10));
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(113,141,255,0.10), 0 10px 24px rgba(15, 23, 42, 0.30), 0 0 18px rgba(113,141,255,0.08);
+        }
+
+        .miniOptionActive .miniOptionText {
+          color: #9ab7ff;
         }
 
         .actionsPanel {
@@ -506,13 +521,13 @@ export default function HomePage() {
             gap: 6px;
           }
 
-          .miniOption {
+          .miniPad {
             border-radius: 10px;
           }
 
-          .miniOptionInner {
-            font-size: 10px;
-            padding: 6px;
+          .miniOptionText {
+            font-size: 9px;
+            letter-spacing: 0.1em;
           }
 
           .actionsPanel {

@@ -7,7 +7,7 @@ export type Iro = 'CLEAR' | 'COOL' | 'HEAVY' | 'MIST';
 export type Kuse = 'STRAIGHT' | 'JUMP' | 'WAVE' | 'SHARP';
 export type Nori = 'STEP' | 'PUSH' | 'SWING' | 'BREAK';
 export type Kazari = 'NONE' | 'LIGHT' | 'MID' | 'RICH';
-export type Kizami = 'LOW' | 'MID' | 'HIGH';
+export type Kizami = 'LOW' | 'MID' | 'HIGH' | 'PEAK';
 export type Yuragi = 'TIGHT' | 'NATURAL' | 'LOOSE';
 
 export type PublicParams = {
