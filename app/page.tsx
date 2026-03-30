@@ -122,20 +122,19 @@ export default function HomePage() {
     const engine = engineRef.current;
     if (!engine) return;
 
-    if (isPlaying) {
-      engine.updatePattern(pattern);
+    if (!isPlaying) {
+      engine.stop();
+      return;
     }
+
+    void engine.start(pattern);
   }, [isPlaying, pattern]);
 
-  const handlePlay = async () => {
-    const engine = engineRef.current;
-    if (!engine) return;
+  const handlePlay = () => {
     setIsPlaying(true);
-    await engine.start(pattern);
   };
 
   const handleStop = () => {
-    engineRef.current?.stop();
     setIsPlaying(false);
   };
 
