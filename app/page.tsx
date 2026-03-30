@@ -121,117 +121,364 @@ export default function HomePage() {
   ];
 
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        background: '#0a0a0a',
-        color: '#fafafa',
-        padding: 32,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: 1200,
-          borderRadius: 32,
-          border: '1px solid rgba(255,255,255,0.10)',
-          background: '#121212',
-          overflow: 'hidden',
-          boxShadow: '0 25px 80px rgba(0,0,0,0.45)',
-        }}
-      >
-        <div
-          style={{
-            borderBottom: '1px solid rgba(255,255,255,0.10)',
-            padding: '20px 32px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 16,
-            flexWrap: 'wrap',
-          }}
-        >
+    <main className="pageRoot">
+      <div className="shell">
+        <div className="headerRow">
           <div>
-            <div style={{ fontSize: 12, letterSpacing: '0.35em', color: '#737373' }}>MUSIC NFT TOOL</div>
-            <h1 style={{ margin: '10px 0 0', fontSize: 32 }}>Beat Fader Hook Audio</h1>
+            <div className="eyebrow">MUSIC NFT TOOL</div>
+            <h1 className="title">Beat Fader Hook Audio</h1>
           </div>
-          <div style={{ display: 'flex', gap: 12, fontSize: 14, color: '#a3a3a3' }}>
+          <div className="pillRow">
             <div style={pillStyle}>TANE: {tane}</div>
             <div style={pillStyle}>{isPlaying ? 'PLAYING' : 'STOPPED'}</div>
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.2fr) minmax(320px,0.8fr)' }}>
-          <section style={{ padding: 32, borderRight: '1px solid rgba(255,255,255,0.10)' }}>
-            <div
-              style={{
-                position: 'relative',
-                width: '100%',
-                maxWidth: 560,
-                aspectRatio: '1 / 1',
-                margin: '0 auto',
-                borderRadius: '50%',
-                border: '1px solid rgba(255,255,255,0.10)',
-                background:
-                  'radial-gradient(circle at 50% 48%, #171717 0%, #0f0f0f 35%, #090909 70%, #050505 100%)',
-                boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.03)',
-              }}
-            >
-              <div style={{ position: 'absolute', inset: 40, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.10)' }} />
-              <div style={{ position: 'absolute', inset: 80, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.10)' }} />
-              <div style={{ position: 'absolute', inset: 112, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.06)' }} />
-              <div style={{ position: 'absolute', top: 24, left: '50%', transform: 'translateX(-50%)', fontSize: 12, letterSpacing: '0.35em', color: '#737373' }}>DEMO PLAYER</div>
-              <div style={{ position: 'absolute', inset: '50% auto auto 50%', transform: 'translate(-50%, -50%)', width: 32, height: 32, borderRadius: '50%', background: '#ececec', boxShadow: '0 8px 20px rgba(0,0,0,0.4)' }} />
-              <div style={{ position: 'absolute', bottom: 40, left: '50%', transform: 'translateX(-50%)', width: '72%', height: 8, borderRadius: 999, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                <div style={{ width: isPlaying ? '72%' : '28%', height: '100%', background: 'rgba(236,236,236,0.85)' }} />
+        <div className="contentGrid">
+          <section className="mainPanel">
+            <div className="turntableWrap">
+              <div className="ring ring1" />
+              <div className="ring ring2" />
+              <div className="ring ring3" />
+              <div className="playerLabel">DEMO PLAYER</div>
+              <div className="centerHub" />
+              <div className="progressTrack">
+                <div className="progressFill" style={{ width: isPlaying ? '72%' : '28%' }} />
               </div>
-              <div style={{ position: 'absolute', right: 50, top: 100, width: 170, height: 4, borderRadius: 999, background: 'linear-gradient(90deg, #a3a3a3 0%, #efefef 100%)', transform: 'rotate(18deg)', transformOrigin: 'left center', boxShadow: '0 6px 14px rgba(0,0,0,0.3)' }}>
-                <div style={{ position: 'absolute', right: -4, top: '50%', transform: 'translateY(-50%)', width: 14, height: 14, borderRadius: '50%', background: '#f5f5f5', boxShadow: '0 4px 8px rgba(0,0,0,0.25)' }} />
+              <div className="tonearm">
+                <div className="tonearmNeedle" />
               </div>
             </div>
 
-            <div style={{ marginTop: 32, display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 16 }}>
+            <div className="knobGrid">
               {knobs.map((knob) => (
                 <KnobCard key={knob.label} label={knob.label} value={knob.value} onClick={knob.onClick} />
               ))}
             </div>
           </section>
 
-          <aside style={{ padding: 32, background: 'rgba(0,0,0,0.15)' }}>
+          <aside className="sidePanel">
             <section style={panelStyle}>
-              <div style={{ fontSize: 12, letterSpacing: '0.3em', color: '#737373' }}>CURRENT STATE</div>
-              <div style={{ marginTop: 16, display: 'grid', gap: 12 }}>
+              <div className="panelEyebrow">CURRENT STATE</div>
+              <div className="stateList">
                 {stateRows.map(([key, value]) => (
-                  <div key={key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderRadius: 18, background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.06)', padding: '12px 16px' }}>
-                    <span style={{ fontSize: 14, letterSpacing: '0.2em', color: '#a3a3a3' }}>{key}</span>
-                    <span style={{ fontSize: 14, fontWeight: 600 }}>{value}</span>
+                  <div key={key} className="stateRow">
+                    <span className="stateKey">{key}</span>
+                    <span className="stateValue">{value}</span>
                   </div>
                 ))}
               </div>
             </section>
 
             <section style={{ ...panelStyle, marginTop: 24 }}>
-              <div style={{ fontSize: 12, letterSpacing: '0.3em', color: '#737373' }}>ACTIONS</div>
-              <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="panelEyebrow">ACTIONS</div>
+              <div className="actionsGrid">
                 <button type="button" style={primaryButtonStyle} onClick={handlePlay}>PLAY</button>
                 <button type="button" style={secondaryButtonStyle} onClick={handleStop}>STOP</button>
-                <button type="button" style={{ ...secondaryButtonStyle, gridColumn: '1 / -1' }} onClick={handleNewTane}>NEW TANE</button>
-                <button type="button" style={{ ...secondaryButtonStyle, gridColumn: '1 / -1', opacity: 0.5 }}>MINT NFT</button>
+                <button type="button" style={{ ...secondaryButtonStyle, gridColumn: '1 / -1' }} onClick={handleNewTane}>
+                  NEW TANE
+                </button>
+                <button type="button" style={{ ...secondaryButtonStyle, gridColumn: '1 / -1' }}>
+                  MINT NFT
+                </button>
               </div>
             </section>
 
             <section style={{ ...panelStyle, marginTop: 24 }}>
-              <div style={{ fontSize: 12, letterSpacing: '0.3em', color: '#737373' }}>NOTES</div>
-              <p style={{ marginTop: 12, fontSize: 14, lineHeight: 1.8, color: '#b8b8b8' }}>
-                PLAY と STOP、NEW TANE、4つのノブが動きます。ノブを押すと値が順送りで変わり、再生中は音も切り替わります。
+              <div className="panelEyebrow">NOTES</div>
+              <p className="notesText">
+                初期状態は BRIGHT / MID / MID / SHORT。1段階目では型・初期値・対応表・種生成の土台までを入れています。
               </p>
             </section>
           </aside>
         </div>
       </div>
+
+      <style jsx>{`
+        .pageRoot {
+          min-height: 100vh;
+          background: #0a0a0a;
+          color: #fafafa;
+          padding: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .shell {
+          width: 100%;
+          max-width: 1200px;
+          border-radius: 32px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: #121212;
+          overflow: hidden;
+          box-shadow: 0 25px 80px rgba(0, 0, 0, 0.45);
+        }
+
+        .headerRow {
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          padding: 20px 32px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          flex-wrap: wrap;
+        }
+
+        .eyebrow,
+        .panelEyebrow,
+        .playerLabel,
+        .stateKey {
+          font-size: 12px;
+          letter-spacing: 0.3em;
+          color: #737373;
+        }
+
+        .title {
+          margin: 10px 0 0;
+          font-size: 32px;
+          line-height: 1.1;
+        }
+
+        .pillRow {
+          display: flex;
+          gap: 12px;
+          font-size: 14px;
+          color: #a3a3a3;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+        }
+
+        .contentGrid {
+          display: grid;
+          grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+        }
+
+        .mainPanel {
+          padding: 32px;
+          border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .turntableWrap {
+          position: relative;
+          width: min(100%, 560px);
+          aspect-ratio: 1 / 1;
+          margin: 0 auto;
+          border-radius: 50%;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: radial-gradient(circle at 50% 48%, #171717 0%, #0f0f0f 35%, #090909 70%, #050505 100%);
+          box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+        }
+
+        .ring {
+          position: absolute;
+          border-radius: 50%;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .ring1 { inset: 40px; }
+        .ring2 { inset: 80px; }
+        .ring3 {
+          inset: 112px;
+          border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .playerLabel {
+          position: absolute;
+          top: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          white-space: nowrap;
+        }
+
+        .centerHub {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: #ececec;
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+          transform: translate(-50%, -50%);
+        }
+
+        .progressTrack {
+          position: absolute;
+          bottom: 40px;
+          left: 50%;
+          width: 72%;
+          height: 8px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.06);
+          overflow: hidden;
+          transform: translateX(-50%);
+        }
+
+        .progressFill {
+          height: 100%;
+          background: rgba(236, 236, 236, 0.85);
+        }
+
+        .tonearm {
+          position: absolute;
+          right: 50px;
+          top: 100px;
+          width: 170px;
+          height: 4px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #a3a3a3 0%, #efefef 100%);
+          transform: rotate(18deg);
+          transform-origin: left center;
+          box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+        }
+
+        .tonearmNeedle {
+          position: absolute;
+          right: -4px;
+          top: 50%;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          background: #f5f5f5;
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+          transform: translateY(-50%);
+        }
+
+        .knobGrid {
+          margin-top: 32px;
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 16px;
+        }
+
+        .sidePanel {
+          padding: 32px;
+          background: rgba(0, 0, 0, 0.15);
+        }
+
+        .stateList {
+          margin-top: 16px;
+          display: grid;
+          gap: 12px;
+        }
+
+        .stateRow {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          border-radius: 18px;
+          background: rgba(0, 0, 0, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          padding: 12px 16px;
+        }
+
+        .stateValue {
+          font-size: 14px;
+          font-weight: 600;
+        }
+
+        .actionsGrid {
+          margin-top: 16px;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+        }
+
+        .notesText {
+          margin: 16px 0 0;
+          color: #d4d4d4;
+          line-height: 1.8;
+          font-size: 14px;
+        }
+
+        @media (max-width: 980px) {
+          .contentGrid {
+            grid-template-columns: 1fr;
+          }
+
+          .mainPanel {
+            border-right: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .pageRoot {
+            padding: 12px;
+            align-items: stretch;
+          }
+
+          .shell {
+            border-radius: 24px;
+          }
+
+          .headerRow,
+          .mainPanel,
+          .sidePanel {
+            padding: 18px;
+          }
+
+          .title {
+            font-size: 22px;
+          }
+
+          .pillRow {
+            width: 100%;
+            justify-content: flex-start;
+          }
+
+          .knobGrid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+          }
+
+          .actionsGrid {
+            grid-template-columns: 1fr;
+          }
+
+          .actionsGrid :global(button) {
+            grid-column: auto !important;
+          }
+
+          .turntableWrap {
+            width: 100%;
+          }
+
+          .ring1 { inset: 24px; }
+          .ring2 { inset: 52px; }
+          .ring3 { inset: 78px; }
+
+          .playerLabel {
+            top: 16px;
+            font-size: 10px;
+          }
+
+          .centerHub {
+            width: 24px;
+            height: 24px;
+          }
+
+          .progressTrack {
+            bottom: 22px;
+            width: 64%;
+            height: 6px;
+          }
+
+          .tonearm {
+            right: 24px;
+            top: 72px;
+            width: 104px;
+            height: 3px;
+          }
+
+          .tonearmNeedle {
+            width: 10px;
+            height: 10px;
+          }
+        }
+      `}</style>
     </main>
   );
 }
