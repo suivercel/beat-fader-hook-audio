@@ -20,39 +20,41 @@ function nextValue<T extends string>(current: T, values: readonly T[]): T {
 }
 
 const panelStyle: React.CSSProperties = {
-  borderRadius: 24,
-  border: '1px solid rgba(255,255,255,0.10)',
-  background: 'rgba(255,255,255,0.03)',
-  padding: 20,
+  borderRadius: 16,
+  border: '1px solid rgba(255,255,255,0.08)',
+  background: 'rgba(255,255,255,0.025)',
+  padding: 16,
 };
 
 const pillStyle: React.CSSProperties = {
-  padding: '8px 12px',
+  padding: '7px 11px',
   borderRadius: 999,
-  background: 'rgba(255,255,255,0.05)',
-  border: '1px solid rgba(255,255,255,0.10)',
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.08)',
 };
 
 const primaryButtonStyle: React.CSSProperties = {
-  borderRadius: 16,
-  border: '1px solid rgba(255,255,255,0.10)',
-  background: '#f5f5f5',
+  borderRadius: 12,
+  border: '1px solid rgba(255,255,255,0.08)',
+  background: '#f3f3f3',
   color: '#111111',
-  fontSize: 15,
+  fontSize: 14,
   fontWeight: 700,
-  padding: '13px 14px',
+  padding: '12px 12px',
   cursor: 'pointer',
+  width: '100%',
 };
 
 const secondaryButtonStyle: React.CSSProperties = {
-  borderRadius: 16,
-  border: '1px solid rgba(255,255,255,0.10)',
-  background: 'rgba(255,255,255,0.05)',
+  borderRadius: 12,
+  border: '1px solid rgba(255,255,255,0.08)',
+  background: 'rgba(255,255,255,0.04)',
   color: '#fafafa',
-  fontSize: 15,
+  fontSize: 14,
   fontWeight: 700,
-  padding: '13px 14px',
+  padding: '12px 12px',
   cursor: 'pointer',
+  width: '100%',
 };
 
 export default function HomePage() {
@@ -113,13 +115,6 @@ export default function HomePage() {
     },
   ];
 
-  const stateRows = [
-    ['OORA', publicParams.oora],
-    ['IKIOI', publicParams.ikioi],
-    ['TENPO', publicParams.tenpo],
-    ['MEGURI', publicParams.meguri],
-  ];
-
   return (
     <main className="pageRoot">
       <div className="shell">
@@ -135,41 +130,6 @@ export default function HomePage() {
         </div>
 
         <div className="contentGrid">
-          <aside className="sidePanel sidePanelTop">
-            <section style={panelStyle}>
-              <div className="panelEyebrow">ACTIONS</div>
-              <div className="actionsGrid">
-                <button type="button" style={primaryButtonStyle} onClick={handlePlay}>PLAY</button>
-                <button type="button" style={secondaryButtonStyle} onClick={handleStop}>STOP</button>
-                <button type="button" style={{ ...secondaryButtonStyle, gridColumn: '1 / -1' }} onClick={handleNewTane}>
-                  NEW TANE
-                </button>
-                <button type="button" style={{ ...secondaryButtonStyle, gridColumn: '1 / -1' }}>
-                  MINT NFT
-                </button>
-              </div>
-            </section>
-
-            <section className="stateSection" style={{ ...panelStyle, marginTop: 20 }}>
-              <div className="panelEyebrow">CURRENT STATE</div>
-              <div className="stateList compactStateList">
-                {stateRows.map(([key, value]) => (
-                  <div key={key} className="stateRow compactStateRow">
-                    <span className="stateKey">{key}</span>
-                    <span className="stateValue">{value}</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="notesSection" style={{ ...panelStyle, marginTop: 20 }}>
-              <div className="panelEyebrow">NOTES</div>
-              <p className="notesText">
-                初期状態は BRIGHT / MID / MID / SHORT。1段階目では型・初期値・対応表・種生成の土台までを入れています。
-              </p>
-            </section>
-          </aside>
-
           <section className="mainPanel">
             <div className="turntableWrap">
               <div className="ring ring1" />
@@ -187,10 +147,24 @@ export default function HomePage() {
 
             <div className="knobGrid">
               {knobs.map((knob) => (
-                <KnobCard key={knob.label} label={knob.label} value={knob.value} onClick={knob.onClick} />
+                <KnobCard key={knob.label} label={knob.label} value={knob.value} onClick={knob.onClick} compact />
               ))}
             </div>
           </section>
+
+          <aside className="sidePanel">
+            <section style={panelStyle}>
+              <div className="panelEyebrow">ACTIONS</div>
+              <div className="actionsGrid actionsTopRow">
+                <button type="button" style={primaryButtonStyle} onClick={handlePlay}>PLAY</button>
+                <button type="button" style={secondaryButtonStyle} onClick={handleStop}>STOP</button>
+              </div>
+              <div className="actionsStack">
+                <button type="button" style={secondaryButtonStyle} onClick={handleNewTane}>NEW TANE</button>
+                <button type="button" style={secondaryButtonStyle}>MINT NFT</button>
+              </div>
+            </section>
+          </aside>
         </div>
       </div>
 
@@ -207,17 +181,17 @@ export default function HomePage() {
 
         .shell {
           width: 100%;
-          max-width: 1200px;
-          border-radius: 32px;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          background: #121212;
+          max-width: 1180px;
+          border-radius: 22px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #111111;
           overflow: hidden;
-          box-shadow: 0 25px 80px rgba(0, 0, 0, 0.45);
+          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
         }
 
         .headerRow {
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          padding: 18px 28px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          padding: 16px 24px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -227,59 +201,60 @@ export default function HomePage() {
 
         .eyebrow,
         .panelEyebrow,
-        .playerLabel,
-        .stateKey {
-          font-size: 12px;
-          letter-spacing: 0.3em;
-          color: #737373;
+        .playerLabel {
+          font-size: 11px;
+          letter-spacing: 0.28em;
+          color: #8b8b8b;
+          text-transform: uppercase;
         }
 
         .title {
           margin: 8px 0 0;
           font-size: 32px;
-          line-height: 1.1;
+          line-height: 1.05;
+          font-weight: 600;
         }
 
         .pillRow {
           display: flex;
-          gap: 12px;
-          font-size: 14px;
-          color: #a3a3a3;
+          gap: 10px;
+          font-size: 13px;
+          color: #b0b0b0;
           flex-wrap: wrap;
           justify-content: flex-end;
         }
 
         .contentGrid {
           display: grid;
-          grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+          grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
         }
 
         .mainPanel {
-          padding: 24px 26px 22px;
-          border-right: 1px solid rgba(255, 255, 255, 0.1);
+          padding: 20px 22px 18px;
+          border-right: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .sidePanel {
-          padding: 24px;
-          background: rgba(0, 0, 0, 0.22);
+          padding: 20px;
+          background: rgba(0, 0, 0, 0.18);
         }
 
         .turntableWrap {
           position: relative;
-          width: min(100%, 500px);
+          width: min(100%, 440px);
           aspect-ratio: 1 / 1;
           margin: 0 auto;
           border-radius: 9999px;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          background: radial-gradient(circle at center, #111111 0%, #0b0b0b 55%, #080808 100%);
-          box-shadow: inset 0 0 40px rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          background: radial-gradient(circle at center, #141414 0%, #0d0d0d 56%, #090909 100%);
+          box-shadow: inset 0 0 44px rgba(255, 255, 255, 0.04);
         }
 
         .ring {
           position: absolute;
           inset: 0;
           border-radius: 9999px;
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.14);
         }
 
         .ring1 { inset: 8%; }
@@ -295,14 +270,14 @@ export default function HomePage() {
 
         .centerHub {
           position: absolute;
-          width: 34px;
-          height: 34px;
+          width: 28px;
+          height: 28px;
           border-radius: 9999px;
-          background: #e5e5e5;
+          background: #e8e8e8;
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+          box-shadow: 0 0 18px rgba(255, 255, 255, 0.14);
         }
 
         .progressTrack {
@@ -310,99 +285,91 @@ export default function HomePage() {
           left: 18%;
           right: 18%;
           bottom: 7%;
-          height: 8px;
-          background: rgba(255, 255, 255, 0.07);
+          height: 6px;
+          background: rgba(255, 255, 255, 0.08);
           border-radius: 999px;
           overflow: hidden;
         }
 
         .progressFill {
           height: 100%;
-          background: rgba(255, 255, 255, 0.85);
+          background: rgba(255, 255, 255, 0.92);
           border-radius: 999px;
         }
 
         .tonearm {
           position: absolute;
-          right: 11%;
+          right: 10%;
           top: 24%;
-          width: 34%;
-          height: 10px;
-          background: linear-gradient(90deg, rgba(255,255,255,0.75), rgba(255,255,255,0.95));
+          width: 31%;
+          height: 6px;
+          background: linear-gradient(90deg, rgba(214,214,214,0.72), rgba(245,245,245,0.94));
           border-radius: 999px;
-          transform: rotate(18deg);
+          transform: rotate(19deg);
           transform-origin: right center;
+          box-shadow: 0 1px 10px rgba(0,0,0,0.28);
+        }
+
+        .tonearm::before {
+          content: '';
+          position: absolute;
+          left: -2px;
+          top: 50%;
+          width: 14%;
+          height: 2px;
+          border-radius: 999px;
+          background: rgba(255,255,255,0.84);
+          transform: translateY(-50%);
         }
 
         .tonearm::after {
           content: '';
           position: absolute;
-          right: -5px;
+          right: -4px;
           top: 50%;
-          width: 16px;
-          height: 16px;
+          width: 12px;
+          height: 12px;
           border-radius: 999px;
           background: #f0f0f0;
           transform: translateY(-50%);
+          box-shadow: 0 0 0 2px rgba(255,255,255,0.06);
         }
 
         .tonearmNeedle {
-          position: absolute;
-          left: -2px;
-          top: 50%;
-          width: 14%;
-          height: 3px;
-          border-radius: 999px;
-          background: rgba(255,255,255,0.72);
-          transform: translateY(-50%);
+          display: none;
         }
 
         .knobGrid {
-          margin-top: 20px;
+          margin-top: 18px;
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
-          gap: 10px;
-        }
-
-        .stateList {
-          margin-top: 14px;
-          display: grid;
-          gap: 12px;
-        }
-
-        .stateRow {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-radius: 18px;
-          background: rgba(0, 0, 0, 0.22);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          padding: 12px 14px;
-        }
-
-        .stateValue {
-          font-size: 14px;
-          font-weight: 700;
+          gap: 8px;
         }
 
         .actionsGrid {
           display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 10px;
-          margin-top: 14px;
+          margin-top: 12px;
         }
 
-        .notesText {
-          margin: 14px 0 0;
-          color: #bfbfbf;
-          line-height: 1.6;
-          font-size: 14px;
+        .actionsTopRow {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .actionsStack {
+          display: grid;
+          gap: 10px;
+          margin-top: 10px;
         }
 
         @media (max-width: 860px) {
           .pageRoot {
             padding: 10px;
             align-items: flex-start;
+          }
+
+          .shell {
+            border-radius: 18px;
           }
 
           .headerRow {
@@ -415,10 +382,9 @@ export default function HomePage() {
 
           .eyebrow,
           .panelEyebrow,
-          .playerLabel,
-          .stateKey {
+          .playerLabel {
             font-size: 10px;
-            letter-spacing: 0.25em;
+            letter-spacing: 0.24em;
           }
 
           .contentGrid {
@@ -426,48 +392,36 @@ export default function HomePage() {
             flex-direction: column;
           }
 
-          .sidePanelTop {
-            order: 1;
-            padding: 14px 14px 0;
-          }
-
           .mainPanel {
-            order: 2;
+            order: 1;
             padding: 14px;
             border-right: none;
           }
 
+          .sidePanel {
+            order: 2;
+            padding: 0 14px 14px;
+            background: transparent;
+          }
+
           .turntableWrap {
-            width: min(100%, 250px);
+            width: min(100%, 210px);
           }
 
           .knobGrid {
             margin-top: 12px;
-            gap: 8px;
-          }
-
-          .actionsGrid {
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 8px;
+            gap: 6px;
           }
 
-          .actionsGrid :global(button:nth-child(3)),
-          .actionsGrid :global(button:nth-child(4)) {
-            grid-column: span 2;
-          }
-
-          .compactStateList {
+          .actionsTopRow {
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 8px;
           }
 
-          .compactStateRow {
-            padding: 10px 12px;
-            border-radius: 14px;
-          }
-
-          .notesSection {
-            display: none;
+          .actionsStack {
+            gap: 8px;
+            margin-top: 8px;
           }
         }
       `}</style>
