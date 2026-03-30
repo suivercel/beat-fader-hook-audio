@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { KnobCard } from '@/components/KnobCard';
 import { SimpleAudioEngine } from '@/lib/audio/simpleEngine';
 import { DEFAULT_PUBLIC_PARAMS } from '@/lib/constants/defaults';
@@ -28,6 +28,14 @@ const NORI_VALUES: Nori[] = ['STEP', 'PUSH', 'SWING', 'BREAK'];
 const KAZARI_VALUES: Kazari[] = ['NONE', 'LIGHT', 'MID', 'RICH'];
 const KIZAMI_VALUES: Kizami[] = ['LOW', 'MID', 'HIGH', 'PEAK'];
 const IRO_VALUES: Iro[] = ['CLEAR', 'COOL', 'HEAVY', 'MIST'];
+
+const BPM_BY_TENPO: Record<Tenpo, number> = {
+  SLOW: 96,
+  'MID-SLOW': 112,
+  MID: 128,
+  'MID-FAST': 144,
+  FAST: 160,
+};
 
 function nextValue<T extends string>(current: T, values: readonly T[]): T {
   const index = values.indexOf(current);
@@ -76,6 +84,7 @@ export default function HomePage() {
   const engineRef = useRef<SimpleAudioEngine | null>(null);
 
   const baseInternalParams = useMemo(() => deriveInternalParams(publicParams, tane), [publicParams, tane]);
+  const beatSeconds = 60 / BPM_BY_TENPO[publicParams.tenpo];
 
   useEffect(() => {
     setNori(baseInternalParams.nori);
@@ -146,6 +155,12 @@ export default function HomePage() {
     },
   ];
 
+  const turntableStyle = {
+    '--bfha-beat': `${beatSeconds}s`,
+    '--bfha-beat-double': `${beatSeconds * 2}s`,
+    '--bfha-beat-half': `${Math.max(beatSeconds * 0.5, 0.18)}s`,
+  } as CSSProperties;
+
   return (
     <main className="pageRoot">
       <div className="shell">
@@ -162,20 +177,13 @@ export default function HomePage() {
 
         <div className="contentGrid">
           <section className="mainPanel">
-            <div className={`turntableWrap ${isPlaying ? 'turntableActive' : ''}`}>
+            <div className={`turntableWrap ${isPlaying ? 'turntableActive' : ''}`} style={turntableStyle}>
               <div className="ring ring0" />
               <div className="ring ring1" />
               <div className="ring ring2" />
               <div className="ring ring3" />
-              <div className="playerLabel">DEMO PLAYER</div>
               <div className="centerGlow" />
               <div className="centerHub" />
-              <div className="progressTrack">
-                <div className="progressFill" style={{ width: isPlaying ? '72%' : '28%' }} />
-              </div>
-              <div className="tonearm">
-                <div className="tonearmNeedle" />
-              </div>
             </div>
 
             <div className="knobGrid">
@@ -192,8 +200,8 @@ export default function HomePage() {
             </div>
 
             <section className="actionsPanel">
-              <button type="button" className="buttonPrimary" onClick={handlePlay}>PLAY</button>
-              <button type="button" className="buttonSecondary" onClick={handleStop}>STOP</button>
+              <button type="button" className={isPlaying ? 'buttonSecondary' : 'buttonPrimary'} onClick={handlePlay}>PLAY</button>
+              <button type="button" className={isPlaying ? 'buttonPrimary' : 'buttonSecondary'} onClick={handleStop}>STOP</button>
               <button type="button" className="buttonSecondary buttonWide" onClick={handleNewTane}>NEW TANE</button>
               <button type="button" className="buttonSecondary buttonWide">MINT NFT</button>
             </section>
@@ -233,7 +241,6 @@ export default function HomePage() {
         }
 
         .eyebrow,
-        .playerLabel,
         .miniLabel {
           font-size: 12px;
           letter-spacing: 0.28em;
@@ -290,37 +297,31 @@ export default function HomePage() {
           position: absolute;
           border-radius: 999px;
           border: 1px solid rgba(180, 194, 255, 0.14);
-          transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+          transition: transform 0.14s ease, opacity 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+          will-change: transform, box-shadow, opacity;
         }
 
-        .ring0 { inset: 2.5%; border-color: rgba(180, 194, 255, 0.12); }
+        .ring0 { inset: 2.5%; border-color: rgba(180, 194, 255, 0.10); }
         .ring1 { inset: 8%; }
         .ring2 { inset: 20%; border-color: rgba(180, 194, 255, 0.12); }
-        .ring3 { inset: 31%; border-color: rgba(180, 194, 255, 0.1); }
+        .ring3 { inset: 31%; border-color: rgba(180, 194, 255, 0.10); }
 
         .centerGlow {
           position: absolute;
           inset: 36%;
           border-radius: 999px;
           background: radial-gradient(circle, rgba(113,141,255,0.10) 0%, rgba(113,141,255,0.04) 42%, rgba(113,141,255,0.0) 72%);
-          opacity: 0.55;
+          opacity: 0.48;
           transform: scale(1);
-          transition: opacity 0.2s ease, transform 0.2s ease;
+          transition: opacity 0.14s ease, transform 0.14s ease;
+          will-change: transform, opacity;
         }
 
-        .turntableActive .ring0 { animation: bfhaPulseOuter 1.45s ease-in-out infinite; }
-        .turntableActive .ring1 { animation: bfhaPulseA 1.15s ease-in-out infinite; }
-        .turntableActive .ring2 { animation: bfhaPulseB 1.05s ease-in-out infinite; }
-        .turntableActive .ring3 { animation: bfhaPulseC 0.95s ease-in-out infinite; }
-        .turntableActive .centerGlow { animation: bfhaGlow 1.2s ease-in-out infinite; }
-
-        .playerLabel {
-          position: absolute;
-          top: 9%;
-          left: 50%;
-          transform: translateX(-50%);
-          font-size: 11px;
-        }
+        .turntableActive .ring0 { animation: bfhaPulseOuter var(--bfha-beat-double) ease-in-out infinite; }
+        .turntableActive .ring1 { animation: bfhaPulseA var(--bfha-beat) ease-in-out infinite; }
+        .turntableActive .ring2 { animation: bfhaPulseB var(--bfha-beat) ease-in-out infinite; animation-delay: calc(var(--bfha-beat) * -0.12); }
+        .turntableActive .ring3 { animation: bfhaPulseC var(--bfha-beat) ease-in-out infinite; animation-delay: calc(var(--bfha-beat) * -0.2); }
+        .turntableActive .centerGlow { animation: bfhaGlow var(--bfha-beat) ease-in-out infinite; }
 
         .centerHub {
           width: 24px;
@@ -328,47 +329,8 @@ export default function HomePage() {
           border-radius: 999px;
           background: radial-gradient(circle at 40% 35%, #fafafa 0%, #d8d8d8 40%, #8c8c8c 100%);
           box-shadow: 0 0 18px rgba(255,255,255,0.08);
-        }
-
-        .progressTrack {
-          position: absolute;
-          left: 50%;
-          bottom: 10%;
-          transform: translateX(-50%);
-          width: 70%;
-          height: 6px;
-          border-radius: 999px;
-          background: rgba(255, 255, 255, 0.06);
-          overflow: hidden;
-        }
-
-        .progressFill {
-          height: 100%;
-          border-radius: 999px;
-          background: linear-gradient(90deg, rgba(113, 141, 255, 0.35), rgba(123, 166, 255, 0.95));
-        }
-
-        .tonearm {
-          position: absolute;
-          right: 16%;
-          top: 21%;
-          width: 132px;
-          height: 2px;
-          background: linear-gradient(90deg, rgba(240,240,240,0.92), rgba(160,160,160,0.75));
-          transform: rotate(18deg);
-          transform-origin: left center;
-          border-radius: 999px;
-        }
-
-        .tonearmNeedle {
-          position: absolute;
-          right: -2px;
-          top: -4px;
-          width: 10px;
-          height: 10px;
-          border-radius: 999px;
-          background: #e8e8e8;
-          box-shadow: 0 0 12px rgba(255,255,255,0.08);
+          position: relative;
+          z-index: 2;
         }
 
         .knobGrid {
@@ -424,9 +386,9 @@ export default function HomePage() {
           display: block;
           width: 100%;
           text-align: center;
-          font-size: 8px;
+          font-size: 7px;
           line-height: 1.05;
-          letter-spacing: 0.08em;
+          letter-spacing: 0.04em;
           color: #88a8ff;
           white-space: nowrap;
           overflow: hidden;
@@ -458,7 +420,7 @@ export default function HomePage() {
           font-weight: 700;
           letter-spacing: 0.08em;
           cursor: pointer;
-          transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+          transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
         }
 
         .buttonPrimary:hover,
@@ -482,28 +444,28 @@ export default function HomePage() {
         }
 
         @keyframes bfhaPulseOuter {
-          0%, 100% { transform: scale(1); opacity: 0.7; box-shadow: 0 0 0 rgba(113,141,255,0); }
-          50% { transform: scale(1.007); opacity: 1; box-shadow: 0 0 24px rgba(113,141,255,0.10); }
+          0%, 100% { transform: scale(1); opacity: 0.66; box-shadow: 0 0 0 rgba(113,141,255,0); }
+          50% { transform: scale(1.004); opacity: 0.88; box-shadow: 0 0 18px rgba(113,141,255,0.08); }
         }
 
         @keyframes bfhaPulseA {
-          0%, 100% { transform: scale(1); opacity: 0.72; box-shadow: 0 0 0 rgba(113,141,255,0); }
-          50% { transform: scale(1.012); opacity: 1; box-shadow: 0 0 28px rgba(113,141,255,0.12); border-color: rgba(150, 173, 255, 0.42); }
+          0%, 100% { transform: scale(1); opacity: 0.72; box-shadow: 0 0 0 rgba(113,141,255,0); border-color: rgba(180,194,255,0.14); }
+          50% { transform: scale(1.012); opacity: 1; box-shadow: 0 0 28px rgba(113,141,255,0.14); border-color: rgba(150,173,255,0.42); }
         }
 
         @keyframes bfhaPulseB {
-          0%, 100% { transform: scale(1); opacity: 0.72; box-shadow: 0 0 0 rgba(113,141,255,0); }
-          50% { transform: scale(1.015); opacity: 1; box-shadow: 0 0 20px rgba(113,141,255,0.10); border-color: rgba(150, 173, 255, 0.36); }
+          0%, 100% { transform: scale(1); opacity: 0.72; box-shadow: 0 0 0 rgba(113,141,255,0); border-color: rgba(180,194,255,0.12); }
+          50% { transform: scale(1.016); opacity: 1; box-shadow: 0 0 20px rgba(113,141,255,0.11); border-color: rgba(150,173,255,0.34); }
         }
 
         @keyframes bfhaPulseC {
-          0%, 100% { transform: scale(1); opacity: 0.7; box-shadow: 0 0 0 rgba(113,141,255,0); }
-          50% { transform: scale(1.018); opacity: 0.96; box-shadow: 0 0 16px rgba(113,141,255,0.08); border-color: rgba(150, 173, 255, 0.30); }
+          0%, 100% { transform: scale(1); opacity: 0.7; box-shadow: 0 0 0 rgba(113,141,255,0); border-color: rgba(180,194,255,0.10); }
+          50% { transform: scale(1.02); opacity: 0.96; box-shadow: 0 0 14px rgba(113,141,255,0.08); border-color: rgba(150,173,255,0.28); }
         }
 
         @keyframes bfhaGlow {
-          0%, 100% { transform: scale(1); opacity: 0.45; }
-          50% { transform: scale(1.06); opacity: 0.72; }
+          0%, 100% { transform: scale(1); opacity: 0.42; }
+          50% { transform: scale(1.055); opacity: 0.66; }
         }
 
         @media (max-width: 860px) {
@@ -521,7 +483,6 @@ export default function HomePage() {
           }
 
           .eyebrow,
-          .playerLabel,
           .miniLabel {
             font-size: 10px;
             letter-spacing: 0.22em;
@@ -542,12 +503,6 @@ export default function HomePage() {
 
           .turntableWrap {
             width: min(100%, 320px);
-          }
-
-          .tonearm {
-            width: 84px;
-            right: 15%;
-            top: 22%;
           }
 
           .knobGrid {
@@ -573,8 +528,8 @@ export default function HomePage() {
           }
 
           .miniOptionText {
-            font-size: 7px;
-            letter-spacing: 0.04em;
+            font-size: 6px;
+            letter-spacing: 0.01em;
           }
 
           .actionsPanel {
