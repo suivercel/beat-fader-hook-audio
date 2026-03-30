@@ -1,4 +1,11 @@
-import type { InternalParams, PublicParams } from '@/lib/types/music';
+import type {
+  BfhaParams,
+  BfhaRender,
+  BfhaRenderNote,
+  BfhaTokenData,
+  InternalParams,
+  PublicParams,
+} from '@/lib/types/music';
 import { MEGURI_TO_BARS, TENPO_TO_BPM } from '@/lib/constants/mappings';
 
 export type StepEvent = {
@@ -49,6 +56,11 @@ const NOTE_TO_FREQ: Record<string, number> = {
   B4: 493.88,
   C5: 523.25,
 };
+
+const FREQ_TO_NOTE = Object.entries(NOTE_TO_FREQ).reduce<Record<number, string>>((acc, [note, freq]) => {
+  acc[freq] = note;
+  return acc;
+}, {});
 
 function scaleFromParams(publicParams: PublicParams, internalParams: InternalParams): string[] {
   if (internalParams.iro === 'MIST') return ['C4', 'D4', 'F4', 'G4', 'A#4', 'C5'];
@@ -109,7 +121,6 @@ function paletteFromInternal(internalParams: InternalParams): TonePalette {
       noiseCutoff: 1500,
     };
   }
-
   if (internalParams.iro === 'COOL') {
     return {
       leadType: 'triangle',
@@ -122,7 +133,6 @@ function paletteFromInternal(internalParams: InternalParams): TonePalette {
       noiseCutoff: 2100,
     };
   }
-
   if (internalParams.iro === 'MIST') {
     return {
       leadType: 'triangle',
@@ -135,7 +145,6 @@ function paletteFromInternal(internalParams: InternalParams): TonePalette {
       noiseCutoff: 2500,
     };
   }
-
   return {
     leadType: 'square',
     harmonyType: 'square',
@@ -148,10 +157,7 @@ function paletteFromInternal(internalParams: InternalParams): TonePalette {
   };
 }
 
-export function createLoopPattern(
-  publicParams: PublicParams,
-  internalParams: InternalParams,
-): LoopPattern {
+export function createLoopPattern(publicParams: PublicParams, internalParams: InternalParams): LoopPattern {
   const bars = MEGURI_TO_BARS[publicParams.meguri];
   const bpm = TENPO_TO_BPM[publicParams.tenpo];
   const stepsPerBar = 16;
@@ -170,13 +176,7 @@ export function createLoopPattern(
   for (const step of activeLeadSteps) {
     const noteName = scale[motif[leadIndex % motif.length] % scale.length];
     const leadVelocity =
-      publicParams.ikioi === 'LOW'
-        ? 0.13
-        : publicParams.ikioi === 'MID'
-          ? 0.16
-          : publicParams.ikioi === 'HIGH'
-            ? 0.18
-            : 0.2;
+      publicParams.ikioi === 'LOW' ? 0.13 : publicParams.ikioi === 'MID' ? 0.16 : publicParams.ikioi === 'HIGH' ? 0.18 : 0.2;
 
     lead[step] = { freq: NOTE_TO_FREQ[noteName], velocity: leadVelocity };
 
@@ -186,12 +186,7 @@ export function createLoopPattern(
         const nextName = scale[(motif[(leadIndex + 1) % motif.length] + 1) % scale.length];
         harmony[step + ornamentOffset] = {
           freq: NOTE_TO_FREQ[nextName],
-          velocity:
-            internalParams.kazari === 'RICH'
-              ? 0.1
-              : internalParams.kazari === 'MID'
-                ? 0.08
-                : 0.05,
+          velocity: internalParams.kazari === 'RICH' ? 0.1 : internalParams.kazari === 'MID' ? 0.08 : 0.05,
         };
       }
     }
@@ -217,21 +212,14 @@ export function createLoopPattern(
     const strong = inBar === 0 || inBar === 8;
     const medium = inBar === 4 || inBar === 12;
     const highExtra = internalParams.kizami === 'HIGH' && (inBar === 2 || inBar === 6 || inBar === 10 || inBar === 14);
-    const peakExtra =
-      internalParams.kizami === 'PEAK' &&
-      (inBar === 1 || inBar === 2 || inBar === 6 || inBar === 10 || inBar === 14);
+    const peakExtra = internalParams.kizami === 'PEAK' && (inBar === 1 || inBar === 2 || inBar === 6 || inBar === 10 || inBar === 14);
 
     if (strong) {
       noise[i] = { freq: 1, velocity: 0.22, kind: 'noise' };
     } else if (medium || (internalParams.kizami !== 'LOW' && inBar % 4 === 2) || highExtra || peakExtra) {
       noise[i] = {
         freq: 1,
-        velocity:
-          internalParams.kizami === 'PEAK'
-            ? 0.17
-            : internalParams.kizami === 'HIGH'
-              ? 0.16
-              : 0.1,
+        velocity: internalParams.kizami === 'PEAK' ? 0.17 : internalParams.kizami === 'HIGH' ? 0.16 : 0.1,
         kind: 'noise',
       };
     }
@@ -252,4 +240,56 @@ export function createLoopPattern(
   }
 
   return { bpm, bars, stepsPerBar, lead, harmony, bass, noise, palette };
+}
+
+function eventArrayToRender(events: StepEvent[], kind: 'tone' | 'noise'): BfhaRenderNote[] {
+  const result: BfhaRenderNote[] = [];
+  for (let step = 0; step < events.length; step += 1) {
+    const event = events[step];
+    if (event.freq === null || event.velocity <= 0) continue;
+    const nextSilent = events[step + 1]?.freq === null || step === events.length - 1;
+    const length = nextSilent ? 1 : 2;
+
+    if (kind === 'noise') {
+      result.push({ step, type: event.velocity >= 0.18 ? 'accent' : 'hit', length, velocity: Number(event.velocity.toFixed(3)) });
+    } else {
+      result.push({
+        step,
+        note: FREQ_TO_NOTE[event.freq] ?? `FREQ_${event.freq.toFixed(2)}`,
+        length,
+        velocity: Number(event.velocity.toFixed(3)),
+      });
+    }
+  }
+  return result;
+}
+
+export function buildBfhaRender(pattern: LoopPattern): BfhaRender {
+  return {
+    bpm: pattern.bpm,
+    bars: pattern.bars,
+    leadPattern: eventArrayToRender(pattern.lead, 'tone'),
+    bassPattern: eventArrayToRender(pattern.bass, 'tone'),
+    noisePattern: eventArrayToRender(pattern.noise, 'noise'),
+  };
+}
+
+export function buildBfhaTokenData(args: {
+  params: BfhaParams;
+  pattern: LoopPattern;
+  title?: string;
+  createdAt?: string;
+}): BfhaTokenData {
+  const { params, pattern, title, createdAt } = args;
+  return {
+    version: 1,
+    app: 'BFHA',
+    tokenType: 'music-loop',
+    params,
+    render: buildBfhaRender(pattern),
+    meta: {
+      title,
+      createdAt,
+    },
+  };
 }

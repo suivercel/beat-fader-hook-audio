@@ -4,7 +4,8 @@ import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import { KnobCard } from '@/components/KnobCard';
 import { SimpleAudioEngine } from '@/lib/audio/simpleEngine';
 import { DEFAULT_PUBLIC_PARAMS } from '@/lib/constants/defaults';
-import { createLoopPattern } from '@/lib/generator/createLoopPattern';
+import { publicParamsToUi, uiToBfhaParams } from '@/lib/constants/mappings';
+import { buildBfhaTokenData, createLoopPattern } from '@/lib/generator/createLoopPattern';
 import { createSeed } from '@/lib/generator/createSeed';
 import { deriveInternalParams } from '@/lib/generator/deriveInternalParams';
 import type {
@@ -93,6 +94,17 @@ export default function HomePage() {
     setIro(baseInternalParams.iro);
   }, [baseInternalParams]);
 
+  const uiState = useMemo(
+    () =>
+      publicParamsToUi(publicParams, {
+        nori,
+        kazari,
+        kizami,
+        iro,
+      }),
+    [publicParams, nori, kazari, kizami, iro],
+  );
+
   const internalParams = useMemo(
     () => ({
       ...baseInternalParams,
@@ -130,6 +142,24 @@ export default function HomePage() {
 
   const handleNewTane = () => {
     setTane(createSeed());
+  };
+
+  const handleExportJson = () => {
+    const params = uiToBfhaParams(uiState, tane);
+    const tokenData = buildBfhaTokenData({
+      params,
+      pattern,
+      title: `BFHA Loop ${tane}`,
+      createdAt: new Date().toISOString(),
+    });
+
+    const blob = new Blob([JSON.stringify(tokenData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `bfha-loop-${tane}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
   };
 
   const knobs = [
@@ -203,7 +233,7 @@ export default function HomePage() {
               <button type="button" className={isPlaying ? 'buttonSecondary' : 'buttonPrimary'} onClick={handlePlay}>PLAY</button>
               <button type="button" className={isPlaying ? 'buttonPrimary' : 'buttonSecondary'} onClick={handleStop}>STOP</button>
               <button type="button" className="buttonSecondary buttonWide" onClick={handleNewTane}>NEW TANE</button>
-              <button type="button" className="buttonSecondary buttonWide">MINT NFT</button>
+              <button type="button" className="buttonSecondary buttonWide" onClick={handleExportJson}>EXPORT JSON</button>
             </section>
           </section>
         </div>

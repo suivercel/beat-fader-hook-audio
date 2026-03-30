@@ -33,7 +33,6 @@ export type LoopState = {
 };
 
 export type PlaybackStatus = 'idle' | 'playing' | 'stopped';
-
 export type ScheduledChange = Partial<PublicParams> | null;
 
 export type PlayerState = {
@@ -47,4 +46,44 @@ export type SavedLoop = {
   version: 1;
   publicParams: PublicParams;
   tane: number;
+};
+
+export type BfhaParams = {
+  tane: number;
+  oora: number;
+  ikioi: number;
+  tenpo: number;
+  meguri: number;
+  nori: number;
+  kazari: number;
+  kizami: number;
+  iro: number;
+};
+
+export type BfhaRenderNote = {
+  step: number;
+  length: number;
+  velocity: number;
+  note?: string;
+  type?: string;
+};
+
+export type BfhaRender = {
+  bpm: number;
+  bars: number;
+  leadPattern: BfhaRenderNote[];
+  bassPattern: BfhaRenderNote[];
+  noisePattern: BfhaRenderNote[];
+};
+
+export type BfhaTokenData = {
+  version: 1;
+  app: 'BFHA';
+  tokenType: 'music-loop';
+  params: BfhaParams;
+  render: BfhaRender;
+  meta?: {
+    title?: string;
+    createdAt?: string;
+  };
 };
