@@ -17,6 +17,7 @@ export class SimpleAudioEngine {
   private timerId: number | null = null;
   private pattern: LoopPattern | null = null;
   private noiseBuffer: AudioBuffer | null = null;
+  private isRunning = false;
 
   private ensureContext(): AudioContext | null {
     if (typeof window === 'undefined') return null;
@@ -34,18 +35,46 @@ export class SimpleAudioEngine {
     const context = this.ensureContext();
     if (!context || !this.masterGain) return;
     await context.resume();
-    this.stop();
+
+    if (!this.isRunning) {
+      this.currentStep = 0;
+      this.nextNoteTime = context.currentTime + 0.05;
+    }
+
     this.pattern = pattern;
-    this.masterGain.gain.value = pattern.palette.masterGain;
-    this.currentStep = 0;
-    this.nextNoteTime = context.currentTime + 0.05;
-    this.timerId = window.setInterval(() => this.scheduler(), 25);
+    this.masterGain.gain.cancelScheduledValues(context.currentTime);
+    this.masterGain.gain.setValueAtTime(pattern.palette.masterGain, context.currentTime);
+
+    if (this.timerId === null) {
+      this.timerId = window.setInterval(() => this.scheduler(), 25);
+    }
+
+    this.isRunning = true;
+  }
+
+  updatePattern(pattern: LoopPattern) {
+    const context = this.context;
+    this.pattern = pattern;
+
+    if (context && this.masterGain) {
+      this.masterGain.gain.cancelScheduledValues(context.currentTime);
+      this.masterGain.gain.linearRampToValueAtTime(pattern.palette.masterGain, context.currentTime + 0.04);
+    }
   }
 
   stop() {
     if (this.timerId !== null) {
       window.clearInterval(this.timerId);
       this.timerId = null;
+    }
+
+    this.isRunning = false;
+
+    if (this.context && this.masterGain) {
+      const now = this.context.currentTime;
+      this.masterGain.gain.cancelScheduledValues(now);
+      this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
+      this.masterGain.gain.linearRampToValueAtTime(0.0001, now + 0.04);
     }
   }
 

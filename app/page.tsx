@@ -87,13 +87,6 @@ export default function HomePage() {
   const baseInternalParams = useMemo(() => deriveInternalParams(publicParams, tane), [publicParams, tane]);
   const beatSeconds = 60 / BPM_BY_TENPO[publicParams.tenpo];
 
-  useEffect(() => {
-    setNori(baseInternalParams.nori);
-    setKazari(baseInternalParams.kazari);
-    setKizami(baseInternalParams.kizami);
-    setIro(baseInternalParams.iro);
-  }, [baseInternalParams]);
-
   const uiState = useMemo(
     () =>
       publicParamsToUi(publicParams, {
@@ -126,13 +119,19 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (!isPlaying) return;
-    void engineRef.current?.start(pattern);
+    const engine = engineRef.current;
+    if (!engine) return;
+
+    if (isPlaying) {
+      engine.updatePattern(pattern);
+    }
   }, [isPlaying, pattern]);
 
   const handlePlay = async () => {
+    const engine = engineRef.current;
+    if (!engine) return;
     setIsPlaying(true);
-    await engineRef.current?.start(pattern);
+    await engine.start(pattern);
   };
 
   const handleStop = () => {
