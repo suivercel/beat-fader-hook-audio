@@ -63,12 +63,12 @@ const FREQ_TO_NOTE = Object.entries(NOTE_TO_FREQ).reduce<Record<number, string>>
 }, {});
 
 function scaleFromParams(publicParams: PublicParams, internalParams: InternalParams): string[] {
-  if (internalParams.iro === 'MIST') return ['C4', 'D4', 'F4', 'G4', 'A#4', 'C5'];
+  if (internalParams.iro === 'FLOAT') return ['C4', 'D4', 'F4', 'G4', 'A#4', 'C5'];
   if (publicParams.oora === 'BRIGHT') return ['C4', 'D4', 'E4', 'G4', 'A4', 'C5'];
   if (publicParams.oora === 'CALM') return ['C4', 'D4', 'E4', 'G4', 'B4', 'C5'];
   if (publicParams.oora === 'DARK') return ['C4', 'D4', 'D#4', 'G4', 'A#4', 'C5'];
   if (internalParams.iro === 'HEAVY') return ['C4', 'D4', 'D#4', 'F4', 'G4', 'A#4'];
-  if (internalParams.iro === 'COOL') return ['C4', 'D4', 'F4', 'G4', 'A4', 'C5'];
+  if (internalParams.iro === 'CRISP') return ['C4', 'E4', 'G4', 'A4', 'B4', 'C5'];
   return ['C4', 'D4', 'E4', 'G4', 'A4', 'C5'];
 }
 
@@ -121,28 +121,28 @@ function paletteFromInternal(internalParams: InternalParams): TonePalette {
       noiseCutoff: 1500,
     };
   }
-  if (internalParams.iro === 'COOL') {
+  if (internalParams.iro === 'CRISP') {
     return {
-      leadType: 'triangle',
+      leadType: 'sawtooth',
       harmonyType: 'square',
       bassType: 'triangle',
-      leadDuration: 0.12,
-      harmonyDuration: 0.08,
-      bassDuration: 0.18,
-      masterGain: 0.66,
-      noiseCutoff: 2100,
+      leadDuration: 0.08,
+      harmonyDuration: 0.06,
+      bassDuration: 0.16,
+      masterGain: 0.74,
+      noiseCutoff: 2800,
     };
   }
-  if (internalParams.iro === 'MIST') {
+  if (internalParams.iro === 'FLOAT') {
     return {
-      leadType: 'triangle',
-      harmonyType: 'sine',
+      leadType: 'sine',
+      harmonyType: 'triangle',
       bassType: 'triangle',
-      leadDuration: 0.18,
-      harmonyDuration: 0.12,
-      bassDuration: 0.22,
-      masterGain: 0.62,
-      noiseCutoff: 2500,
+      leadDuration: 0.22,
+      harmonyDuration: 0.16,
+      bassDuration: 0.24,
+      masterGain: 0.72,
+      noiseCutoff: 3200,
     };
   }
   return {
@@ -166,6 +166,8 @@ export function createLoopPattern(publicParams: PublicParams, internalParams: In
   const motif = motifIndexes(internalParams.kuse);
   const activeLeadSteps = rhythmSteps(internalParams.nori, totalSteps);
   const palette = paletteFromInternal(internalParams);
+  const crispAccent = internalParams.iro === 'CRISP';
+  const floatMode = internalParams.iro === 'FLOAT';
 
   const lead: StepEvent[] = Array.from({ length: totalSteps }, () => ({ freq: null, velocity: 0 }));
   const harmony: StepEvent[] = Array.from({ length: totalSteps }, () => ({ freq: null, velocity: 0 }));
@@ -175,13 +177,14 @@ export function createLoopPattern(publicParams: PublicParams, internalParams: In
   let leadIndex = Math.abs(internalParams.tane) % motif.length;
   for (const step of activeLeadSteps) {
     const noteName = scale[motif[leadIndex % motif.length] % scale.length];
-    const leadVelocity =
+    const leadVelocityBase =
       publicParams.ikioi === 'LOW' ? 0.13 : publicParams.ikioi === 'MID' ? 0.16 : publicParams.ikioi === 'HIGH' ? 0.18 : 0.2;
+    const leadVelocity = floatMode ? leadVelocityBase * 0.92 : crispAccent ? leadVelocityBase * 1.08 : leadVelocityBase;
 
     lead[step] = { freq: NOTE_TO_FREQ[noteName], velocity: leadVelocity };
 
     if (internalParams.kazari !== 'NONE') {
-      const ornamentOffset = internalParams.kazari === 'RICH' ? 1 : 2;
+      const ornamentOffset = internalParams.kazari === 'RICH' ? 1 : floatMode ? 3 : 2;
       if (step + ornamentOffset < totalSteps && step % 8 === 0) {
         const nextName = scale[(motif[(leadIndex + 1) % motif.length] + 1) % scale.length];
         harmony[step + ornamentOffset] = {
@@ -190,6 +193,13 @@ export function createLoopPattern(publicParams: PublicParams, internalParams: In
         };
       }
     }
+
+    if (crispAccent && step + 1 < totalSteps && step % 4 === 0 && harmony[step + 1].freq === null) {
+      harmony[step + 1] = {
+        freq: NOTE_TO_FREQ[scale[(motif[leadIndex % motif.length] + 2) % scale.length]],
+        velocity: 0.045,
+      };
+    }
     leadIndex += 1;
   }
 
@@ -197,8 +207,8 @@ export function createLoopPattern(publicParams: PublicParams, internalParams: In
   for (let bar = 0; bar < bars; bar += 1) {
     const baseStep = bar * stepsPerBar;
     const bassFreq = NOTE_TO_FREQ[bassLine[bar]];
-    bass[baseStep] = { freq: bassFreq, velocity: 0.14 };
-    bass[baseStep + 8] = { freq: bassFreq, velocity: internalParams.iro === 'HEAVY' ? 0.13 : 0.1 };
+    bass[baseStep] = { freq: bassFreq, velocity: floatMode ? 0.1 : 0.14 };
+    bass[baseStep + 8] = { freq: bassFreq, velocity: internalParams.iro === 'HEAVY' ? 0.13 : floatMode ? 0.08 : 0.1 };
     if ((internalParams.kizami === 'HIGH' || internalParams.kizami === 'PEAK') && baseStep + 12 < totalSteps) {
       bass[baseStep + 12] = {
         freq: bassFreq,
@@ -215,11 +225,11 @@ export function createLoopPattern(publicParams: PublicParams, internalParams: In
     const peakExtra = internalParams.kizami === 'PEAK' && (inBar === 1 || inBar === 2 || inBar === 6 || inBar === 10 || inBar === 14);
 
     if (strong) {
-      noise[i] = { freq: 1, velocity: 0.22, kind: 'noise' };
+      noise[i] = { freq: 1, velocity: floatMode ? 0.16 : 0.22, kind: 'noise' };
     } else if (medium || (internalParams.kizami !== 'LOW' && inBar % 4 === 2) || highExtra || peakExtra) {
       noise[i] = {
         freq: 1,
-        velocity: internalParams.kizami === 'PEAK' ? 0.17 : internalParams.kizami === 'HIGH' ? 0.16 : 0.1,
+        velocity: floatMode ? 0.08 : internalParams.kizami === 'PEAK' ? 0.17 : internalParams.kizami === 'HIGH' ? 0.16 : 0.1,
         kind: 'noise',
       };
     }
@@ -228,6 +238,21 @@ export function createLoopPattern(publicParams: PublicParams, internalParams: In
   if (publicParams.ikioi === 'LOW') {
     for (let i = 0; i < totalSteps; i += 1) {
       if (i % 8 === 4) lead[i] = { freq: null, velocity: 0 };
+    }
+  }
+
+  if (floatMode) {
+    for (let i = 0; i < totalSteps; i += 1) {
+      if (i % 8 !== 0 && i % 16 !== 4) {
+        noise[i] = { freq: null, velocity: 0, kind: 'noise' };
+      }
+    }
+    for (let bar = 0; bar < bars; bar += 1) {
+      const padStep = bar * stepsPerBar + 4;
+      const padNote = scale[(bar + 2) % scale.length];
+      if (padStep < totalSteps) {
+        harmony[padStep] = { freq: NOTE_TO_FREQ[padNote], velocity: 0.06 };
+      }
     }
   }
 

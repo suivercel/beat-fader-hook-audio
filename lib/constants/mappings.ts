@@ -70,9 +70,9 @@ export const UI_TO_PARAMS = {
   } satisfies Record<Kizami, number>,
   iro: {
     CLEAR: 10,
-    COOL: 35,
+    CRISP: 35,
     HEAVY: 65,
-    MIST: 90,
+    FLOAT: 90,
   } satisfies Record<Iro, number>,
 } as const;
 

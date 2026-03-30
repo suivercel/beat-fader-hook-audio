@@ -28,7 +28,7 @@ const MEGURI_VALUES: Meguri[] = ['SHORT', 'MID', 'LONG'];
 const NORI_VALUES: Nori[] = ['STEP', 'PUSH', 'SWING', 'BREAK'];
 const KAZARI_VALUES: Kazari[] = ['NONE', 'LIGHT', 'MID', 'RICH'];
 const KIZAMI_VALUES: Kizami[] = ['LOW', 'MID', 'HIGH', 'PEAK'];
-const IRO_VALUES: Iro[] = ['CLEAR', 'COOL', 'HEAVY', 'MIST'];
+const IRO_VALUES: Iro[] = ['CLEAR', 'CRISP', 'HEAVY', 'FLOAT'];
 
 const BPM_BY_TENPO: Record<Tenpo, number> = {
   SLOW: 96,

@@ -3,7 +3,7 @@ export type Ikioi = 'LOW' | 'MID' | 'HIGH' | 'MAX';
 export type Tenpo = 'SLOW' | 'MID-SLOW' | 'MID' | 'MID-FAST' | 'FAST';
 export type Meguri = 'SHORT' | 'MID' | 'LONG';
 
-export type Iro = 'CLEAR' | 'COOL' | 'HEAVY' | 'MIST';
+export type Iro = 'CLEAR' | 'CRISP' | 'HEAVY' | 'FLOAT';
 export type Kuse = 'STRAIGHT' | 'JUMP' | 'WAVE' | 'SHARP';
 export type Nori = 'STEP' | 'PUSH' | 'SWING' | 'BREAK';
 export type Kazari = 'NONE' | 'LIGHT' | 'MID' | 'RICH';

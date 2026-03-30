@@ -25,7 +25,7 @@ export function deriveInternalParams(
       : oora === 'BRIGHT'
         ? 'CLEAR'
         : oora === 'DARK'
-          ? chooseBySeed(tane, ['COOL', 'HEAVY'] as const)
+          ? chooseBySeed(tane, ['CRISP', 'HEAVY'] as const)
           : 'HEAVY';
 
   const kuse: Kuse =
