@@ -13,6 +13,11 @@ function totalSteps(pattern: LoopPattern): number {
   return Math.max(1, pattern.bars * pattern.stepsPerBar);
 }
 
+function stepDurationSeconds(bpm: number): number {
+  const safeBpm = Number.isFinite(bpm) && bpm > 1 ? bpm : 120;
+  return (60 / safeBpm) / 4;
+}
+
 function emptyEvent(): StepEvent {
   return { freq: null, velocity: 0 };
 }
@@ -35,13 +40,14 @@ function normalizePattern(pattern: LoopPattern): LoopPattern {
 export class SimpleAudioEngine {
   private context: AudioContext | null = null;
   private masterGain: GainNode | null = null;
-  private nextNoteTime = 0;
-  private currentStep = 0;
   private timerId: number | null = null;
-  private pattern: LoopPattern | null = null;
   private noiseBuffer: AudioBuffer | null = null;
+  private pattern: LoopPattern | null = null;
   private isRunning = false;
-  private lastBpm = 128;
+
+  private nextNoteTime = 0;
+  private stepCursor = 0;
+  private transportAnchorTime = 0;
 
   private ensureContext(): AudioContext | null {
     if (typeof window === 'undefined') return null;
@@ -55,22 +61,27 @@ export class SimpleAudioEngine {
     return this.context;
   }
 
+  private setAnchorFromNow(now: number, bpm: number) {
+    const stepDuration = stepDurationSeconds(bpm);
+    this.nextNoteTime = now + 0.05;
+    this.transportAnchorTime = this.nextNoteTime - this.stepCursor * stepDuration;
+  }
+
   async start(pattern: LoopPattern) {
     const context = this.ensureContext();
     if (!context || !this.masterGain) return;
     await context.resume();
 
-    if (!this.isRunning) {
-      this.currentStep = 0;
-      this.nextNoteTime = context.currentTime + 0.05;
-    }
-
     const safePattern = normalizePattern(pattern);
     this.pattern = safePattern;
-    this.currentStep = this.currentStep % totalSteps(safePattern);
+
+    if (!this.isRunning) {
+      this.stepCursor = 0;
+      this.setAnchorFromNow(context.currentTime, safePattern.bpm);
+    }
+
     this.masterGain.gain.cancelScheduledValues(context.currentTime);
     this.masterGain.gain.setValueAtTime(safePattern.palette.masterGain, context.currentTime);
-    this.lastBpm = safePattern.bpm;
 
     if (this.timerId === null) {
       this.timerId = window.setInterval(() => this.scheduler(), 25);
@@ -80,23 +91,24 @@ export class SimpleAudioEngine {
   }
 
   updatePattern(pattern: LoopPattern) {
-    const context = this.context;
     const safePattern = normalizePattern(pattern);
-    const previousBpm = this.lastBpm;
     this.pattern = safePattern;
-    this.currentStep = this.currentStep % totalSteps(safePattern);
 
-    if (context && this.masterGain) {
-      this.masterGain.gain.cancelScheduledValues(context.currentTime);
-      this.masterGain.gain.linearRampToValueAtTime(safePattern.palette.masterGain, context.currentTime + 0.04);
+    const context = this.context;
+    if (!context || !this.masterGain) return;
 
-      const bpmChanged = Math.abs(safePattern.bpm - previousBpm) > 0.1;
-      if (bpmChanged || this.nextNoteTime < context.currentTime || this.nextNoteTime > context.currentTime + 0.3) {
-        this.nextNoteTime = context.currentTime + 0.05;
-      }
+    this.masterGain.gain.cancelScheduledValues(context.currentTime);
+    this.masterGain.gain.linearRampToValueAtTime(safePattern.palette.masterGain, context.currentTime + 0.04);
+
+    const stepDuration = stepDurationSeconds(safePattern.bpm);
+    const skew = this.nextNoteTime - context.currentTime;
+
+    if (!Number.isFinite(this.nextNoteTime) || !Number.isFinite(this.transportAnchorTime) || skew < -0.12 || skew > 0.3) {
+      this.setAnchorFromNow(context.currentTime, safePattern.bpm);
+      return;
     }
 
-    this.lastBpm = safePattern.bpm;
+    this.transportAnchorTime = this.nextNoteTime - this.stepCursor * stepDuration;
   }
 
   stop() {
@@ -120,20 +132,22 @@ export class SimpleAudioEngine {
     const pattern = this.pattern;
     if (!context || !this.masterGain || !pattern) return;
 
-    if (!Number.isFinite(this.nextNoteTime) || this.nextNoteTime < context.currentTime - 0.1 || this.nextNoteTime > context.currentTime + 0.5) {
-      this.nextNoteTime = context.currentTime + 0.05;
+    if (!Number.isFinite(this.nextNoteTime) || !Number.isFinite(this.transportAnchorTime)) {
+      this.setAnchorFromNow(context.currentTime, pattern.bpm);
+    }
+
+    const stepDuration = stepDurationSeconds(pattern.bpm);
+    if (this.nextNoteTime < context.currentTime - 0.12 || this.nextNoteTime > context.currentTime + 0.5) {
+      this.setAnchorFromNow(context.currentTime, pattern.bpm);
     }
 
     while (this.nextNoteTime < context.currentTime + 0.15) {
-      this.scheduleStep(pattern, this.currentStep, this.nextNoteTime);
-      this.advanceStep(pattern);
+      const loopLength = totalSteps(pattern);
+      const step = ((this.stepCursor % loopLength) + loopLength) % loopLength;
+      this.scheduleStep(pattern, step, this.nextNoteTime);
+      this.stepCursor += 1;
+      this.nextNoteTime = this.transportAnchorTime + this.stepCursor * stepDuration;
     }
-  }
-
-  private advanceStep(pattern: LoopPattern) {
-    const secondsPerStep = (60 / pattern.bpm) / 4;
-    this.nextNoteTime += secondsPerStep;
-    this.currentStep = (this.currentStep + 1) % totalSteps(pattern);
   }
 
   private scheduleStep(pattern: LoopPattern, step: number, time: number) {
@@ -147,7 +161,6 @@ export class SimpleAudioEngine {
     this.playTone(bassEvent, time, pattern.palette.bassType, pattern.palette.bassDuration);
     this.playNoise(noiseEvent, time, 0.05, pattern.palette.noiseCutoff);
   }
-
 
   private playTone(event: StepEvent, time: number, type: OscillatorType, duration: number) {
     if (!this.context || !this.masterGain || event.freq === null || event.velocity <= 0) return;
