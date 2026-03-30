@@ -13,6 +13,25 @@ function totalSteps(pattern: LoopPattern): number {
   return Math.max(1, pattern.bars * pattern.stepsPerBar);
 }
 
+function emptyEvent(): StepEvent {
+  return { freq: null, velocity: 0 };
+}
+
+function normalizeEvents(events: StepEvent[] | undefined, length: number): StepEvent[] {
+  return Array.from({ length }, (_, i) => events?.[i] ?? emptyEvent());
+}
+
+function normalizePattern(pattern: LoopPattern): LoopPattern {
+  const length = totalSteps(pattern);
+  return {
+    ...pattern,
+    lead: normalizeEvents(pattern.lead, length),
+    harmony: normalizeEvents(pattern.harmony, length),
+    bass: normalizeEvents(pattern.bass, length),
+    noise: normalizeEvents(pattern.noise, length),
+  };
+}
+
 export class SimpleAudioEngine {
   private context: AudioContext | null = null;
   private masterGain: GainNode | null = null;
@@ -22,6 +41,7 @@ export class SimpleAudioEngine {
   private pattern: LoopPattern | null = null;
   private noiseBuffer: AudioBuffer | null = null;
   private isRunning = false;
+  private lastBpm = 128;
 
   private ensureContext(): AudioContext | null {
     if (typeof window === 'undefined') return null;
@@ -45,10 +65,12 @@ export class SimpleAudioEngine {
       this.nextNoteTime = context.currentTime + 0.05;
     }
 
-    this.pattern = pattern;
-    this.currentStep = this.currentStep % totalSteps(pattern);
+    const safePattern = normalizePattern(pattern);
+    this.pattern = safePattern;
+    this.currentStep = this.currentStep % totalSteps(safePattern);
     this.masterGain.gain.cancelScheduledValues(context.currentTime);
-    this.masterGain.gain.setValueAtTime(pattern.palette.masterGain, context.currentTime);
+    this.masterGain.gain.setValueAtTime(safePattern.palette.masterGain, context.currentTime);
+    this.lastBpm = safePattern.bpm;
 
     if (this.timerId === null) {
       this.timerId = window.setInterval(() => this.scheduler(), 25);
@@ -59,13 +81,22 @@ export class SimpleAudioEngine {
 
   updatePattern(pattern: LoopPattern) {
     const context = this.context;
-    this.pattern = pattern;
-    this.currentStep = this.currentStep % totalSteps(pattern);
+    const safePattern = normalizePattern(pattern);
+    const previousBpm = this.lastBpm;
+    this.pattern = safePattern;
+    this.currentStep = this.currentStep % totalSteps(safePattern);
 
     if (context && this.masterGain) {
       this.masterGain.gain.cancelScheduledValues(context.currentTime);
-      this.masterGain.gain.linearRampToValueAtTime(pattern.palette.masterGain, context.currentTime + 0.04);
+      this.masterGain.gain.linearRampToValueAtTime(safePattern.palette.masterGain, context.currentTime + 0.04);
+
+      const bpmChanged = Math.abs(safePattern.bpm - previousBpm) > 0.1;
+      if (bpmChanged || this.nextNoteTime < context.currentTime || this.nextNoteTime > context.currentTime + 0.3) {
+        this.nextNoteTime = context.currentTime + 0.05;
+      }
     }
+
+    this.lastBpm = safePattern.bpm;
   }
 
   stop() {
@@ -89,6 +120,10 @@ export class SimpleAudioEngine {
     const pattern = this.pattern;
     if (!context || !this.masterGain || !pattern) return;
 
+    if (!Number.isFinite(this.nextNoteTime) || this.nextNoteTime < context.currentTime - 0.1 || this.nextNoteTime > context.currentTime + 0.5) {
+      this.nextNoteTime = context.currentTime + 0.05;
+    }
+
     while (this.nextNoteTime < context.currentTime + 0.15) {
       this.scheduleStep(pattern, this.currentStep, this.nextNoteTime);
       this.advanceStep(pattern);
@@ -102,10 +137,10 @@ export class SimpleAudioEngine {
   }
 
   private scheduleStep(pattern: LoopPattern, step: number, time: number) {
-    const leadEvent = pattern.lead[step] ?? this.emptyEvent();
-    const harmonyEvent = pattern.harmony[step] ?? this.emptyEvent();
-    const bassEvent = pattern.bass[step] ?? this.emptyEvent();
-    const noiseEvent = pattern.noise[step] ?? this.emptyEvent();
+    const leadEvent = pattern.lead[step] ?? emptyEvent();
+    const harmonyEvent = pattern.harmony[step] ?? emptyEvent();
+    const bassEvent = pattern.bass[step] ?? emptyEvent();
+    const noiseEvent = pattern.noise[step] ?? emptyEvent();
 
     this.playTone(leadEvent, time, pattern.palette.leadType, pattern.palette.leadDuration);
     this.playTone(harmonyEvent, time, pattern.palette.harmonyType, pattern.palette.harmonyDuration);
@@ -113,9 +148,6 @@ export class SimpleAudioEngine {
     this.playNoise(noiseEvent, time, 0.05, pattern.palette.noiseCutoff);
   }
 
-  private emptyEvent(): StepEvent {
-    return { freq: null, velocity: 0 };
-  }
 
   private playTone(event: StepEvent, time: number, type: OscillatorType, duration: number) {
     if (!this.context || !this.masterGain || event.freq === null || event.velocity <= 0) return;
