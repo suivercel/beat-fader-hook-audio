@@ -45,7 +45,7 @@ function MiniToggleGroup<T extends string>({ label, values, activeValue, onSelec
   return (
     <section className="miniGroup">
       <div className="miniLabel">{label}</div>
-      <div className="miniOptions">
+      <div className="miniOptions" style={{ gridTemplateColumns: `repeat(${values.length}, minmax(0, 1fr))` }}>
         {values.map((value) => {
           const active = value === activeValue;
           return (
@@ -55,7 +55,7 @@ function MiniToggleGroup<T extends string>({ label, values, activeValue, onSelec
               className={`miniOption ${active ? 'miniOptionActive' : ''}`}
               onClick={() => onSelect(value)}
             >
-              {value}
+              <span className="miniOptionInner">{value}</span>
             </button>
           );
         })}
@@ -371,27 +371,39 @@ export default function HomePage() {
 
         .miniOptions {
           margin-top: 10px;
-          display: flex;
-          flex-wrap: wrap;
+          display: grid;
           gap: 8px;
         }
 
         .miniOption {
           border: 1px solid rgba(255,255,255,0.08);
-          background: rgba(255,255,255,0.03);
+          background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.01));
           color: #cfd3dc;
-          border-radius: 10px;
-          padding: 8px 10px;
-          font-size: 12px;
-          line-height: 1;
-          min-height: 34px;
+          border-radius: 12px;
+          padding: 0;
+          min-height: 0;
+          aspect-ratio: 1 / 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.045), inset 0 -10px 20px rgba(0,0,0,0.16);
+          transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .miniOptionInner {
+          display: block;
+          padding: 8px;
+          font-size: 11px;
+          line-height: 1.15;
+          letter-spacing: 0.16em;
+          text-align: center;
         }
 
         .miniOptionActive {
           color: #95b7ff;
-          border-color: rgba(113, 141, 255, 0.45);
-          background: rgba(113, 141, 255, 0.12);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+          border-color: rgba(113, 141, 255, 0.48);
+          background: linear-gradient(180deg, rgba(113, 141, 255, 0.18), rgba(113, 141, 255, 0.08));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(113,141,255,0.08), 0 10px 24px rgba(15, 23, 42, 0.28);
         }
 
         .actionsPanel {
@@ -495,11 +507,12 @@ export default function HomePage() {
           }
 
           .miniOption {
-            flex: 1 1 calc(50% - 6px);
-            min-width: 0;
-            font-size: 11px;
-            padding: 8px 8px;
-            border-radius: 8px;
+            border-radius: 10px;
+          }
+
+          .miniOptionInner {
+            font-size: 10px;
+            padding: 6px;
           }
 
           .actionsPanel {
