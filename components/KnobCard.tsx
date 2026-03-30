@@ -20,19 +20,20 @@ export function KnobCard({ label, value, onClick }: KnobCardProps) {
 
       <style jsx>{`
         .knobCardButton {
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          background: rgba(255, 255, 255, 0.03);
-          border-radius: 24px;
-          padding: 16px 12px;
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          background: rgba(255, 255, 255, 0.02);
+          border-radius: 18px;
+          padding: 10px 6px 8px;
           text-align: center;
           cursor: pointer;
           width: 100%;
+          min-width: 0;
         }
 
         .knobFace {
           position: relative;
-          width: 96px;
-          height: 96px;
+          width: 68px;
+          height: 68px;
           margin: 0 auto;
           border-radius: 50%;
           border: 1px solid rgba(255, 255, 255, 0.1);
@@ -44,65 +45,67 @@ export function KnobCard({ label, value, onClick }: KnobCardProps) {
 
         .knobInnerRing {
           position: absolute;
-          inset: 12px;
+          inset: 9px;
           border-radius: 50%;
           border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .knobPointer {
           position: absolute;
-          top: 12px;
+          top: 9px;
           left: 50%;
           transform: translateX(-50%);
-          width: 4px;
-          height: 22px;
+          width: 3px;
+          height: 15px;
           border-radius: 999px;
           background: #e5e5e5;
         }
 
         .knobLabel {
-          font-size: 11px;
-          letter-spacing: 0.3em;
+          font-size: 10px;
+          letter-spacing: 0.22em;
           color: #d4d4d4;
-          margin-left: 0.3em;
+          margin-left: 0.22em;
+          white-space: nowrap;
         }
 
         .knobValue {
-          margin-top: 16px;
-          font-size: 18px;
-          font-weight: 600;
+          margin-top: 8px;
+          font-size: 14px;
+          font-weight: 700;
           word-break: break-word;
+          line-height: 1.15;
         }
 
-        @media (max-width: 640px) {
+        @media (max-width: 860px) {
           .knobCardButton {
-            border-radius: 18px;
-            padding: 12px 8px;
+            border-radius: 14px;
+            padding: 8px 4px 6px;
           }
 
           .knobFace {
-            width: 72px;
-            height: 72px;
+            width: 56px;
+            height: 56px;
           }
 
           .knobInnerRing {
-            inset: 10px;
+            inset: 8px;
           }
 
           .knobPointer {
-            top: 10px;
+            top: 8px;
             width: 3px;
-            height: 16px;
+            height: 12px;
           }
 
           .knobLabel {
-            font-size: 9px;
-            letter-spacing: 0.22em;
+            font-size: 8px;
+            letter-spacing: 0.18em;
           }
 
           .knobValue {
-            margin-top: 12px;
-            font-size: 14px;
+            margin-top: 6px;
+            font-size: 12px;
           }
         }
       `}</style>
