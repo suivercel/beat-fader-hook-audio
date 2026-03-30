@@ -43,11 +43,10 @@ export class SimpleAudioEngine {
   private timerId: number | null = null;
   private noiseBuffer: AudioBuffer | null = null;
   private pattern: LoopPattern | null = null;
+  private pendingPattern: LoopPattern | null = null;
   private isRunning = false;
-
   private nextNoteTime = 0;
   private stepCursor = 0;
-  private transportAnchorTime = 0;
 
   private ensureContext(): AudioContext | null {
     if (typeof window === 'undefined') return null;
@@ -61,10 +60,9 @@ export class SimpleAudioEngine {
     return this.context;
   }
 
-  private setAnchorFromNow(now: number, bpm: number) {
-    const stepDuration = stepDurationSeconds(bpm);
+  private resetTransport(now: number) {
+    this.stepCursor = 0;
     this.nextNoteTime = now + 0.05;
-    this.transportAnchorTime = this.nextNoteTime - this.stepCursor * stepDuration;
   }
 
   async start(pattern: LoopPattern) {
@@ -72,16 +70,12 @@ export class SimpleAudioEngine {
     if (!context || !this.masterGain) return;
     await context.resume();
 
-    const safePattern = normalizePattern(pattern);
-    this.pattern = safePattern;
-
-    if (!this.isRunning) {
-      this.stepCursor = 0;
-      this.setAnchorFromNow(context.currentTime, safePattern.bpm);
-    }
+    this.pattern = normalizePattern(pattern);
+    this.pendingPattern = null;
+    this.resetTransport(context.currentTime);
 
     this.masterGain.gain.cancelScheduledValues(context.currentTime);
-    this.masterGain.gain.setValueAtTime(safePattern.palette.masterGain, context.currentTime);
+    this.masterGain.gain.setValueAtTime(this.pattern.palette.masterGain, context.currentTime);
 
     if (this.timerId === null) {
       this.timerId = window.setInterval(() => this.scheduler(), 25);
@@ -92,23 +86,14 @@ export class SimpleAudioEngine {
 
   updatePattern(pattern: LoopPattern) {
     const safePattern = normalizePattern(pattern);
-    this.pattern = safePattern;
 
-    const context = this.context;
-    if (!context || !this.masterGain) return;
-
-    this.masterGain.gain.cancelScheduledValues(context.currentTime);
-    this.masterGain.gain.linearRampToValueAtTime(safePattern.palette.masterGain, context.currentTime + 0.04);
-
-    const stepDuration = stepDurationSeconds(safePattern.bpm);
-    const skew = this.nextNoteTime - context.currentTime;
-
-    if (!Number.isFinite(this.nextNoteTime) || !Number.isFinite(this.transportAnchorTime) || skew < -0.12 || skew > 0.3) {
-      this.setAnchorFromNow(context.currentTime, safePattern.bpm);
+    if (!this.isRunning || !this.context || !this.masterGain || !this.pattern) {
+      this.pattern = safePattern;
+      this.pendingPattern = null;
       return;
     }
 
-    this.transportAnchorTime = this.nextNoteTime - this.stepCursor * stepDuration;
+    this.pendingPattern = safePattern;
   }
 
   stop() {
@@ -118,6 +103,7 @@ export class SimpleAudioEngine {
     }
 
     this.isRunning = false;
+    this.pendingPattern = null;
 
     if (this.context && this.masterGain) {
       const now = this.context.currentTime;
@@ -127,26 +113,45 @@ export class SimpleAudioEngine {
     }
   }
 
+  private applyPendingPattern(atTime: number) {
+    if (!this.pendingPattern || !this.masterGain) return;
+
+    this.pattern = this.pendingPattern;
+    this.pendingPattern = null;
+    this.stepCursor = 0;
+    this.nextNoteTime = atTime;
+
+    this.masterGain.gain.cancelScheduledValues(atTime);
+    this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, atTime);
+    this.masterGain.gain.linearRampToValueAtTime(this.pattern.palette.masterGain, atTime + 0.03);
+  }
+
   private scheduler() {
     const context = this.context;
-    const pattern = this.pattern;
-    if (!context || !this.masterGain || !pattern) return;
+    if (!context || !this.masterGain || !this.pattern) return;
 
-    if (!Number.isFinite(this.nextNoteTime) || !Number.isFinite(this.transportAnchorTime)) {
-      this.setAnchorFromNow(context.currentTime, pattern.bpm);
-    }
-
-    const stepDuration = stepDurationSeconds(pattern.bpm);
-    if (this.nextNoteTime < context.currentTime - 0.12 || this.nextNoteTime > context.currentTime + 0.5) {
-      this.setAnchorFromNow(context.currentTime, pattern.bpm);
+    if (!Number.isFinite(this.nextNoteTime) || this.nextNoteTime < context.currentTime - 0.2 || this.nextNoteTime > context.currentTime + 0.5) {
+      this.resetTransport(context.currentTime);
     }
 
     while (this.nextNoteTime < context.currentTime + 0.15) {
-      const loopLength = totalSteps(pattern);
+      let activePattern = this.pattern;
+      const currentLoopLength = totalSteps(activePattern);
+      const stepInLoop = ((this.stepCursor % currentLoopLength) + currentLoopLength) % currentLoopLength;
+
+      // パターン差し替えは小節頭だけで行う。長さやBPMが変わっても崩れにくい。
+      if (this.pendingPattern && stepInLoop % activePattern.stepsPerBar === 0) {
+        this.applyPendingPattern(this.nextNoteTime);
+        if (!this.pattern) return;
+        activePattern = this.pattern;
+      }
+
+      const loopLength = totalSteps(activePattern);
       const step = ((this.stepCursor % loopLength) + loopLength) % loopLength;
-      this.scheduleStep(pattern, step, this.nextNoteTime);
+      this.scheduleStep(activePattern, step, this.nextNoteTime);
+
       this.stepCursor += 1;
-      this.nextNoteTime = this.transportAnchorTime + this.stepCursor * stepDuration;
+      this.nextNoteTime += stepDurationSeconds(activePattern.bpm);
     }
   }
 
