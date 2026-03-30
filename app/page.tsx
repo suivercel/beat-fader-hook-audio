@@ -7,63 +7,93 @@ import { DEFAULT_PUBLIC_PARAMS } from '@/lib/constants/defaults';
 import { createLoopPattern } from '@/lib/generator/createLoopPattern';
 import { createSeed } from '@/lib/generator/createSeed';
 import { deriveInternalParams } from '@/lib/generator/deriveInternalParams';
-import type { Ikioi, Meguri, Oora, PublicParams, Tenpo } from '@/lib/types/music';
+import type {
+  Ikioi,
+  Iro,
+  Kazari,
+  Kizami,
+  Meguri,
+  Nori,
+  Oora,
+  PublicParams,
+  Tenpo,
+} from '@/lib/types/music';
 
 const OORA_VALUES: Oora[] = ['CALM', 'BRIGHT', 'DARK', 'HARD'];
 const IKIOI_VALUES: Ikioi[] = ['LOW', 'MID', 'HIGH', 'MAX'];
 const TENPO_VALUES: Tenpo[] = ['SLOW', 'MID-SLOW', 'MID', 'MID-FAST', 'FAST'];
 const MEGURI_VALUES: Meguri[] = ['SHORT', 'MID', 'LONG'];
 
+const NORI_VALUES: Nori[] = ['STEP', 'PUSH', 'SWING', 'BREAK'];
+const KAZARI_VALUES: Kazari[] = ['NONE', 'LIGHT', 'MID', 'RICH'];
+const KIZAMI_VALUES: Kizami[] = ['LOW', 'MID', 'HIGH'];
+const IRO_VALUES: Iro[] = ['CLEAR', 'COOL', 'HEAVY', 'MIST'];
+
 function nextValue<T extends string>(current: T, values: readonly T[]): T {
   const index = values.indexOf(current);
   return values[(index + 1) % values.length];
 }
 
-const panelStyle: React.CSSProperties = {
-  borderRadius: 16,
-  border: '1px solid rgba(255,255,255,0.08)',
-  background: 'rgba(255,255,255,0.025)',
-  padding: 16,
+type MiniToggleGroupProps<T extends string> = {
+  label: string;
+  values: readonly T[];
+  activeValue: T;
+  onSelect: (value: T) => void;
 };
 
-const pillStyle: React.CSSProperties = {
-  padding: '7px 11px',
-  borderRadius: 999,
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.08)',
-};
-
-const primaryButtonStyle: React.CSSProperties = {
-  borderRadius: 12,
-  border: '1px solid rgba(255,255,255,0.08)',
-  background: '#f3f3f3',
-  color: '#111111',
-  fontSize: 14,
-  fontWeight: 700,
-  padding: '12px 12px',
-  cursor: 'pointer',
-  width: '100%',
-};
-
-const secondaryButtonStyle: React.CSSProperties = {
-  borderRadius: 12,
-  border: '1px solid rgba(255,255,255,0.08)',
-  background: 'rgba(255,255,255,0.04)',
-  color: '#fafafa',
-  fontSize: 14,
-  fontWeight: 700,
-  padding: '12px 12px',
-  cursor: 'pointer',
-  width: '100%',
-};
+function MiniToggleGroup<T extends string>({ label, values, activeValue, onSelect }: MiniToggleGroupProps<T>) {
+  return (
+    <section className="miniGroup">
+      <div className="miniLabel">{label}</div>
+      <div className="miniOptions">
+        {values.map((value) => {
+          const active = value === activeValue;
+          return (
+            <button
+              key={value}
+              type="button"
+              className={`miniOption ${active ? 'miniOptionActive' : ''}`}
+              onClick={() => onSelect(value)}
+            >
+              {value}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 export default function HomePage() {
   const [publicParams, setPublicParams] = useState<PublicParams>(DEFAULT_PUBLIC_PARAMS);
   const [tane, setTane] = useState<number>(createSeed());
   const [isPlaying, setIsPlaying] = useState(false);
+  const [nori, setNori] = useState<Nori>('STEP');
+  const [kazari, setKazari] = useState<Kazari>('LIGHT');
+  const [kizami, setKizami] = useState<Kizami>('MID');
+  const [iro, setIro] = useState<Iro>('CLEAR');
   const engineRef = useRef<SimpleAudioEngine | null>(null);
 
-  const internalParams = useMemo(() => deriveInternalParams(publicParams, tane), [publicParams, tane]);
+  const baseInternalParams = useMemo(() => deriveInternalParams(publicParams, tane), [publicParams, tane]);
+
+  useEffect(() => {
+    setNori(baseInternalParams.nori);
+    setKazari(baseInternalParams.kazari);
+    setKizami(baseInternalParams.kizami);
+    setIro(baseInternalParams.iro);
+  }, [baseInternalParams]);
+
+  const internalParams = useMemo(
+    () => ({
+      ...baseInternalParams,
+      nori,
+      kazari,
+      kizami,
+      iro,
+    }),
+    [baseInternalParams, nori, kazari, kizami, iro],
+  );
+
   const pattern = useMemo(() => createLoopPattern(publicParams, internalParams), [publicParams, internalParams]);
 
   useEffect(() => {
@@ -124,8 +154,8 @@ export default function HomePage() {
             <h1 className="title">Beat Fader Hook Audio</h1>
           </div>
           <div className="pillRow">
-            <div style={pillStyle}>TANE: {tane}</div>
-            <div style={pillStyle}>{isPlaying ? 'PLAYING' : 'STOPPED'}</div>
+            <div className="pill">TANE: {tane}</div>
+            <div className="pill">{isPlaying ? 'PLAYING' : 'STOPPED'}</div>
           </div>
         </div>
 
@@ -147,24 +177,24 @@ export default function HomePage() {
 
             <div className="knobGrid">
               {knobs.map((knob) => (
-                <KnobCard key={knob.label} label={knob.label} value={knob.value} onClick={knob.onClick} compact />
+                <KnobCard key={knob.label} label={knob.label} value={knob.value} onClick={knob.onClick} />
               ))}
             </div>
-          </section>
 
-          <aside className="sidePanel">
-            <section style={panelStyle}>
-              <div className="panelEyebrow">ACTIONS</div>
-              <div className="actionsGrid actionsTopRow">
-                <button type="button" style={primaryButtonStyle} onClick={handlePlay}>PLAY</button>
-                <button type="button" style={secondaryButtonStyle} onClick={handleStop}>STOP</button>
-              </div>
-              <div className="actionsStack">
-                <button type="button" style={secondaryButtonStyle} onClick={handleNewTane}>NEW TANE</button>
-                <button type="button" style={secondaryButtonStyle}>MINT NFT</button>
-              </div>
+            <div className="miniGrid">
+              <MiniToggleGroup label="NORI" values={NORI_VALUES} activeValue={nori} onSelect={setNori} />
+              <MiniToggleGroup label="KAZARI" values={KAZARI_VALUES} activeValue={kazari} onSelect={setKazari} />
+              <MiniToggleGroup label="KIZAMI" values={KIZAMI_VALUES} activeValue={kizami} onSelect={setKizami} />
+              <MiniToggleGroup label="IRO" values={IRO_VALUES} activeValue={iro} onSelect={setIro} />
+            </div>
+
+            <section className="actionsPanel">
+              <button type="button" className="buttonPrimary" onClick={handlePlay}>PLAY</button>
+              <button type="button" className="buttonSecondary" onClick={handleStop}>STOP</button>
+              <button type="button" className="buttonSecondary buttonWide" onClick={handleNewTane}>NEW TANE</button>
+              <button type="button" className="buttonSecondary buttonWide">MINT NFT</button>
             </section>
-          </aside>
+          </section>
         </div>
       </div>
 
@@ -182,16 +212,16 @@ export default function HomePage() {
         .shell {
           width: 100%;
           max-width: 1180px;
-          border-radius: 22px;
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          background: #111111;
+          border-radius: 24px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: linear-gradient(180deg, #121212 0%, #101010 100%);
           overflow: hidden;
-          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+          box-shadow: 0 24px 80px rgba(0, 0, 0, 0.46);
         }
 
         .headerRow {
-          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-          padding: 16px 24px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+          padding: 18px 28px;
           display: flex;
           align-items: center;
           justify-content: space-between;
@@ -200,166 +230,206 @@ export default function HomePage() {
         }
 
         .eyebrow,
-        .panelEyebrow,
-        .playerLabel {
-          font-size: 11px;
+        .playerLabel,
+        .miniLabel {
+          font-size: 12px;
           letter-spacing: 0.28em;
-          color: #8b8b8b;
-          text-transform: uppercase;
+          color: #6f7786;
         }
 
         .title {
           margin: 8px 0 0;
           font-size: 32px;
-          line-height: 1.05;
-          font-weight: 600;
+          line-height: 1.1;
+          font-weight: 650;
         }
 
         .pillRow {
           display: flex;
           gap: 10px;
-          font-size: 13px;
-          color: #b0b0b0;
           flex-wrap: wrap;
-          justify-content: flex-end;
+        }
+
+        .pill {
+          padding: 8px 12px;
+          border-radius: 999px;
+          background: rgba(255, 255, 255, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          color: #cfd5e3;
+          font-size: 13px;
         }
 
         .contentGrid {
-          display: grid;
-          grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
+          padding: 22px 24px 24px;
         }
 
         .mainPanel {
-          padding: 20px 22px 18px;
-          border-right: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .sidePanel {
-          padding: 20px;
-          background: rgba(0, 0, 0, 0.18);
+          display: grid;
+          gap: 16px;
         }
 
         .turntableWrap {
           position: relative;
-          width: min(100%, 440px);
+          width: min(100%, 520px);
           aspect-ratio: 1 / 1;
           margin: 0 auto;
-          border-radius: 9999px;
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          background: radial-gradient(circle at center, #141414 0%, #0d0d0d 56%, #090909 100%);
-          box-shadow: inset 0 0 44px rgba(255, 255, 255, 0.04);
+          border-radius: 999px;
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: radial-gradient(circle at 50% 48%, #181818 0%, #101010 65%, #0b0b0b 100%);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -24px 50px rgba(0,0,0,0.35);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
         }
 
         .ring {
           position: absolute;
-          inset: 0;
-          border-radius: 9999px;
-          border: 1px solid rgba(255, 255, 255, 0.14);
+          border-radius: 999px;
+          border: 1px solid rgba(180, 194, 255, 0.14);
         }
 
         .ring1 { inset: 8%; }
-        .ring2 { inset: 17%; }
-        .ring3 { inset: 31%; }
+        .ring2 { inset: 20%; }
+        .ring3 { inset: 31%; border-color: rgba(180, 194, 255, 0.1); }
 
         .playerLabel {
           position: absolute;
-          top: 5%;
+          top: 9%;
           left: 50%;
           transform: translateX(-50%);
+          font-size: 11px;
         }
 
         .centerHub {
-          position: absolute;
-          width: 28px;
-          height: 28px;
-          border-radius: 9999px;
-          background: #e8e8e8;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          box-shadow: 0 0 18px rgba(255, 255, 255, 0.14);
+          width: 24px;
+          height: 24px;
+          border-radius: 999px;
+          background: radial-gradient(circle at 40% 35%, #fafafa 0%, #d8d8d8 40%, #8c8c8c 100%);
+          box-shadow: 0 0 18px rgba(255,255,255,0.08);
         }
 
         .progressTrack {
           position: absolute;
-          left: 18%;
-          right: 18%;
-          bottom: 7%;
+          left: 50%;
+          bottom: 10%;
+          transform: translateX(-50%);
+          width: 70%;
           height: 6px;
-          background: rgba(255, 255, 255, 0.08);
           border-radius: 999px;
+          background: rgba(255, 255, 255, 0.06);
           overflow: hidden;
         }
 
         .progressFill {
           height: 100%;
-          background: rgba(255, 255, 255, 0.92);
           border-radius: 999px;
+          background: linear-gradient(90deg, rgba(113, 141, 255, 0.35), rgba(123, 166, 255, 0.95));
         }
 
         .tonearm {
           position: absolute;
-          right: 10%;
-          top: 24%;
-          width: 31%;
-          height: 6px;
-          background: linear-gradient(90deg, rgba(214,214,214,0.72), rgba(245,245,245,0.94));
-          border-radius: 999px;
-          transform: rotate(19deg);
-          transform-origin: right center;
-          box-shadow: 0 1px 10px rgba(0,0,0,0.28);
-        }
-
-        .tonearm::before {
-          content: '';
-          position: absolute;
-          left: -2px;
-          top: 50%;
-          width: 14%;
+          right: 16%;
+          top: 21%;
+          width: 132px;
           height: 2px;
+          background: linear-gradient(90deg, rgba(240,240,240,0.92), rgba(160,160,160,0.75));
+          transform: rotate(18deg);
+          transform-origin: left center;
           border-radius: 999px;
-          background: rgba(255,255,255,0.84);
-          transform: translateY(-50%);
-        }
-
-        .tonearm::after {
-          content: '';
-          position: absolute;
-          right: -4px;
-          top: 50%;
-          width: 12px;
-          height: 12px;
-          border-radius: 999px;
-          background: #f0f0f0;
-          transform: translateY(-50%);
-          box-shadow: 0 0 0 2px rgba(255,255,255,0.06);
         }
 
         .tonearmNeedle {
-          display: none;
+          position: absolute;
+          right: -2px;
+          top: -4px;
+          width: 10px;
+          height: 10px;
+          border-radius: 999px;
+          background: #e8e8e8;
+          box-shadow: 0 0 12px rgba(255,255,255,0.08);
         }
 
         .knobGrid {
-          margin-top: 18px;
           display: grid;
           grid-template-columns: repeat(4, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .miniGrid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 12px;
+        }
+
+        .miniGroup {
+          border: 1px solid rgba(255,255,255,0.07);
+          background: rgba(255,255,255,0.02);
+          border-radius: 14px;
+          padding: 12px;
+        }
+
+        .miniOptions {
+          margin-top: 10px;
+          display: flex;
+          flex-wrap: wrap;
           gap: 8px;
         }
 
-        .actionsGrid {
-          display: grid;
-          gap: 10px;
-          margin-top: 12px;
+        .miniOption {
+          border: 1px solid rgba(255,255,255,0.08);
+          background: rgba(255,255,255,0.03);
+          color: #cfd3dc;
+          border-radius: 10px;
+          padding: 8px 10px;
+          font-size: 12px;
+          line-height: 1;
+          min-height: 34px;
         }
 
-        .actionsTopRow {
+        .miniOptionActive {
+          color: #95b7ff;
+          border-color: rgba(113, 141, 255, 0.45);
+          background: rgba(113, 141, 255, 0.12);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+
+        .actionsPanel {
+          display: grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
         }
 
-        .actionsStack {
-          display: grid;
-          gap: 10px;
-          margin-top: 10px;
+        .buttonPrimary,
+        .buttonSecondary {
+          min-height: 46px;
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.1);
+          font-size: 14px;
+          font-weight: 700;
+          letter-spacing: 0.08em;
+          cursor: pointer;
+          transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .buttonPrimary:hover,
+        .buttonSecondary:hover,
+        .miniOption:hover {
+          transform: translateY(-1px);
+        }
+
+        .buttonPrimary {
+          background: #f2f3f5;
+          color: #111111;
+        }
+
+        .buttonSecondary {
+          background: rgba(255,255,255,0.04);
+          color: #fafafa;
+        }
+
+        .buttonWide {
+          grid-column: 1 / -1;
         }
 
         @media (max-width: 860px) {
@@ -376,52 +446,71 @@ export default function HomePage() {
             padding: 14px 16px;
           }
 
+          .eyebrow,
+          .playerLabel,
+          .miniLabel {
+            font-size: 10px;
+            letter-spacing: 0.22em;
+          }
+
           .title {
             font-size: 24px;
           }
 
-          .eyebrow,
-          .panelEyebrow,
-          .playerLabel {
-            font-size: 10px;
-            letter-spacing: 0.24em;
+          .pill {
+            font-size: 11px;
+            padding: 6px 10px;
           }
 
           .contentGrid {
-            display: flex;
-            flex-direction: column;
-          }
-
-          .mainPanel {
-            order: 1;
             padding: 14px;
-            border-right: none;
-          }
-
-          .sidePanel {
-            order: 2;
-            padding: 0 14px 14px;
-            background: transparent;
           }
 
           .turntableWrap {
-            width: min(100%, 210px);
+            width: min(100%, 320px);
+          }
+
+          .tonearm {
+            width: 84px;
+            right: 15%;
+            top: 22%;
           }
 
           .knobGrid {
-            margin-top: 12px;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+          }
+
+          .miniGrid {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+          }
+
+          .miniGroup {
+            padding: 10px;
+            border-radius: 12px;
+          }
+
+          .miniOptions {
             gap: 6px;
           }
 
-          .actionsTopRow {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+          .miniOption {
+            flex: 1 1 calc(50% - 6px);
+            min-width: 0;
+            font-size: 11px;
+            padding: 8px 8px;
+            border-radius: 8px;
+          }
+
+          .actionsPanel {
             gap: 8px;
           }
 
-          .actionsStack {
-            gap: 8px;
-            margin-top: 8px;
+          .buttonPrimary,
+          .buttonSecondary {
+            min-height: 42px;
+            border-radius: 10px;
+            font-size: 13px;
           }
         }
       `}</style>

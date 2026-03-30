@@ -4,13 +4,12 @@ type KnobCardProps = {
   label: string;
   value: string;
   onClick?: () => void;
-  compact?: boolean;
 };
 
-export function KnobCard({ label, value, onClick, compact = false }: KnobCardProps) {
+export function KnobCard({ label, value, onClick }: KnobCardProps) {
   return (
     <>
-      <button type="button" onClick={onClick} className={`knobCardButton${compact ? ' compact' : ''}`}>
+      <button type="button" onClick={onClick} className="knobCardButton">
         <div className="knobFace">
           <div className="knobInnerRing" />
           <div className="knobPointer" />
@@ -21,133 +20,93 @@ export function KnobCard({ label, value, onClick, compact = false }: KnobCardPro
 
       <style jsx>{`
         .knobCardButton {
-          border: 1px solid rgba(255, 255, 255, 0.07);
+          border: 1px solid rgba(255, 255, 255, 0.06);
           background: rgba(255, 255, 255, 0.02);
           border-radius: 14px;
-          padding: 8px 4px 6px;
+          padding: 10px 6px 8px;
           text-align: center;
           cursor: pointer;
           width: 100%;
           min-width: 0;
-          color: #f5f5f5;
-          transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
-          -webkit-tap-highlight-color: transparent;
-        }
-
-        .knobCardButton:hover {
-          border-color: rgba(255, 255, 255, 0.14);
-          background: rgba(255, 255, 255, 0.035);
-        }
-
-        .knobCardButton:active {
-          transform: translateY(1px);
         }
 
         .knobFace {
           position: relative;
-          width: 62px;
-          height: 62px;
+          width: 66px;
+          height: 66px;
           margin: 0 auto;
           border-radius: 50%;
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          background: radial-gradient(circle at 50% 40%, #141414, #0a0a0a 72%);
+          border: 1px solid rgba(255, 255, 255, 0.14);
+          background: radial-gradient(circle at 50% 42%, #141414 0%, #0b0b0b 100%);
           display: flex;
           align-items: center;
           justify-content: center;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
         }
 
         .knobInnerRing {
           position: absolute;
-          inset: 8px;
+          inset: 9px;
           border-radius: 50%;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(170, 188, 255, 0.16);
         }
 
         .knobPointer {
           position: absolute;
-          top: 8px;
+          top: 9px;
           left: 50%;
           transform: translateX(-50%);
           width: 3px;
-          height: 13px;
+          height: 15px;
           border-radius: 999px;
-          background: #e8e8e8;
+          background: #eef2ff;
         }
 
         .knobLabel {
           font-size: 10px;
-          letter-spacing: 0.24em;
-          color: #d8d8d8;
-          margin-left: 0.24em;
+          letter-spacing: 0.22em;
+          color: #d4d7df;
+          margin-left: 0.22em;
           white-space: nowrap;
         }
 
         .knobValue {
-          margin-top: 7px;
+          margin-top: 8px;
           font-size: 13px;
           font-weight: 700;
           word-break: break-word;
-          line-height: 1.1;
-          color: #f3f3f3;
-        }
-
-        .compact .knobFace {
-          width: 56px;
-          height: 56px;
-        }
-
-        .compact .knobInnerRing {
-          inset: 7px;
-        }
-
-        .compact .knobPointer {
-          top: 7px;
-          height: 11px;
-        }
-
-        .compact .knobLabel {
-          font-size: 9px;
-          letter-spacing: 0.2em;
-        }
-
-        .compact .knobValue {
-          margin-top: 6px;
-          font-size: 12px;
+          line-height: 1.15;
+          color: #8baeff;
         }
 
         @media (max-width: 860px) {
           .knobCardButton {
             border-radius: 12px;
-            padding: 6px 2px 5px;
+            padding: 8px 4px 6px;
           }
 
-          .knobFace,
-          .compact .knobFace {
-            width: 52px;
-            height: 52px;
+          .knobFace {
+            width: 54px;
+            height: 54px;
           }
 
-          .knobInnerRing,
-          .compact .knobInnerRing {
-            inset: 7px;
+          .knobInnerRing {
+            inset: 8px;
           }
 
-          .knobPointer,
-          .compact .knobPointer {
-            top: 7px;
-            width: 2px;
-            height: 10px;
+          .knobPointer {
+            top: 8px;
+            width: 3px;
+            height: 12px;
           }
 
-          .knobLabel,
-          .compact .knobLabel {
+          .knobLabel {
             font-size: 8px;
-            letter-spacing: 0.16em;
+            letter-spacing: 0.18em;
           }
 
-          .knobValue,
-          .compact .knobValue {
-            margin-top: 5px;
+          .knobValue {
+            margin-top: 6px;
             font-size: 11px;
           }
         }
