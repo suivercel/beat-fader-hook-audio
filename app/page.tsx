@@ -198,7 +198,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         .pageRoot {
           min-height: 100vh;
           background: #0a0a0a;
@@ -377,7 +377,7 @@ export default function HomePage() {
 
         .miniOption {
           border: 1px solid rgba(255,255,255,0.08);
-          background: linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.01));
+          background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.018));
           color: #cfd3dc;
           border-radius: 12px;
           padding: 0;
@@ -386,7 +386,7 @@ export default function HomePage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.045), inset 0 -10px 20px rgba(0,0,0,0.16);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), inset 0 -16px 24px rgba(0,0,0,0.22), 0 1px 0 rgba(255,255,255,0.02);
           transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
         }
 
@@ -402,8 +402,8 @@ export default function HomePage() {
         .miniOptionActive {
           color: #95b7ff;
           border-color: rgba(113, 141, 255, 0.48);
-          background: linear-gradient(180deg, rgba(113, 141, 255, 0.18), rgba(113, 141, 255, 0.08));
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(113,141,255,0.08), 0 10px 24px rgba(15, 23, 42, 0.28);
+          background: linear-gradient(180deg, rgba(113, 141, 255, 0.22), rgba(113, 141, 255, 0.10));
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(113,141,255,0.10), 0 10px 24px rgba(15, 23, 42, 0.30), 0 0 18px rgba(113,141,255,0.08);
         }
 
         .actionsPanel {
