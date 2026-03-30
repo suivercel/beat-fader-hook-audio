@@ -3,17 +3,21 @@
 type KnobCardProps = {
   label: string;
   value: string;
+  onClick?: () => void;
 };
 
-export function KnobCard({ label, value }: KnobCardProps) {
+export function KnobCard({ label, value, onClick }: KnobCardProps) {
   return (
-    <div
+    <button
+      type="button"
+      onClick={onClick}
       style={{
         border: '1px solid rgba(255,255,255,0.08)',
         background: 'rgba(255,255,255,0.03)',
         borderRadius: 24,
         padding: 16,
         textAlign: 'center',
+        cursor: 'pointer',
       }}
     >
       <div
@@ -70,6 +74,6 @@ export function KnobCard({ label, value }: KnobCardProps) {
       >
         {value}
       </div>
-    </div>
+    </button>
   );
 }
