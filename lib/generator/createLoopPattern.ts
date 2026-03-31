@@ -22,6 +22,7 @@ export type TonePalette = {
   harmonyDuration: number;
   bassDuration: number;
   masterGain: number;
+  toneCutoff: number;
   noiseCutoff: number;
   leadAttack: number;
   leadRelease: number;
