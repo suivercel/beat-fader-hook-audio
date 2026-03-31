@@ -214,8 +214,8 @@ export default function HomePage() {
         </div>
 
         <div className="contentGrid">
-          <section className="mainPanel" style={turntableStyle}>
-            <div className={`turntableWrap ${isPlaying ? 'turntableActive' : ''}`}>
+          <section className="mainPanel">
+            <div className={`turntableWrap ${isPlaying ? 'turntableActive' : ''}`} style={turntableStyle}>
               <div className="ring ring0" />
               <div className="ring ring1" />
               <div className="ring ring2" />
@@ -224,7 +224,7 @@ export default function HomePage() {
               <div className="centerHub" />
             </div>
 
-            <div className={`knobGrid ${isPlaying ? 'knobGridActive' : ''}`}>
+            <div className="knobGrid">
               {knobs.map((knob) => (
                 <KnobCard key={knob.label} label={knob.label} value={knob.value} onClick={knob.onClick} />
               ))}
@@ -235,8 +235,8 @@ export default function HomePage() {
               <MiniToggleGroup label="KAZARI" values={KAZARI_VALUES} activeValue={kazari} onSelect={setKazari} />
               <MiniToggleGroup label="KIZAMI" values={KIZAMI_VALUES} activeValue={kizami} onSelect={setKizami} />
               <MiniToggleGroup label="IRO" values={IRO_VALUES} activeValue={iro} onSelect={setIro} />
-              <MiniToggleGroup label="TONE" values={TONE_VALUES} activeValue={tone} onSelect={setTone} />
-              <MiniToggleGroup label="SHAPE" values={SHAPE_VALUES} activeValue={shape} onSelect={setShape} />
+              <MiniToggleGroup label="NUKE" values={TONE_VALUES} activeValue={tone} onSelect={setTone} />
+              <MiniToggleGroup label="KIRE" values={SHAPE_VALUES} activeValue={shape} onSelect={setShape} />
             </div>
 
             <section className="actionsPanel">
