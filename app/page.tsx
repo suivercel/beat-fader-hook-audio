@@ -224,7 +224,7 @@ export default function HomePage() {
               <div className="centerHub" />
             </div>
 
-            <div className="knobGrid">
+            <div className={`knobGrid ${isPlaying ? "knobGridActive" : ""}`.trim()}>
               {knobs.map((knob) => (
                 <KnobCard key={knob.label} label={knob.label} value={knob.value} onClick={knob.onClick} />
               ))}
