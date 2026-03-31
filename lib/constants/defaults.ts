@@ -1,4 +1,4 @@
-import type { InternalParams, PlayerState, PublicParams } from '@/lib/types/music';
+import type { InternalParams, PublicParams } from '../types/music';
 
 export const DEFAULT_PUBLIC_PARAMS: PublicParams = {
   oora: 'BRIGHT',
@@ -15,11 +15,6 @@ export const DEFAULT_INTERNAL_PARAMS: InternalParams = {
   kazari: 'LIGHT',
   kizami: 'MID',
   yuragi: 'NATURAL',
-};
-
-export const DEFAULT_PLAYER_STATE: PlayerState = {
-  status: 'idle',
-  currentBar: 0,
-  currentStep: 0,
-  pendingChange: null,
+  tone: 'OPEN',
+  shape: 'ROUND',
 };
