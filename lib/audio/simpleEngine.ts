@@ -161,25 +161,25 @@ export class SimpleAudioEngine {
     const bassEvent = pattern.bass[step] ?? emptyEvent();
     const noiseEvent = pattern.noise[step] ?? emptyEvent();
 
-    this.playTone(leadEvent, time, pattern.palette.leadType, pattern.palette.leadDuration);
-    this.playTone(harmonyEvent, time, pattern.palette.harmonyType, pattern.palette.harmonyDuration);
-    this.playTone(bassEvent, time, pattern.palette.bassType, pattern.palette.bassDuration);
+    this.playTone(leadEvent, time, pattern.palette.leadType, pattern.palette.leadDuration, pattern.palette.leadAttack, pattern.palette.leadRelease, pattern.palette.toneCutoff);
+    this.playTone(harmonyEvent, time, pattern.palette.harmonyType, pattern.palette.harmonyDuration, pattern.palette.harmonyAttack, pattern.palette.harmonyRelease, pattern.palette.toneCutoff * 0.9);
+    this.playTone(bassEvent, time, pattern.palette.bassType, pattern.palette.bassDuration, pattern.palette.bassAttack, pattern.palette.bassRelease, Math.max(700, pattern.palette.toneCutoff * 0.55));
     this.playNoise(noiseEvent, time, 0.05, pattern.palette.noiseCutoff);
   }
 
-  private playTone(event: StepEvent, time: number, type: OscillatorType, duration: number) {
+  private playTone(event: StepEvent, time: number, type: OscillatorType, duration: number, attack: number, release: number, cutoff: number) {
     if (!this.context || !this.masterGain || event.freq === null || event.velocity <= 0) return;
     const osc = this.context.createOscillator();
     const gain = this.context.createGain();
     const filter = this.context.createBiquadFilter();
     filter.type = type === 'sawtooth' ? 'lowpass' : 'bandpass';
-    filter.frequency.value = type === 'triangle' ? 2200 : type === 'sine' ? 1600 : 2800;
+    filter.frequency.value = cutoff;
 
     osc.type = type;
     osc.frequency.value = event.freq;
     gain.gain.setValueAtTime(0.0001, time);
-    gain.gain.linearRampToValueAtTime(event.velocity, time + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+    gain.gain.linearRampToValueAtTime(event.velocity, time + attack);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + Math.max(duration, release));
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(this.masterGain);

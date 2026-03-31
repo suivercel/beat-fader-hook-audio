@@ -5,6 +5,8 @@ import type {
   Kazari,
   Kizami,
   Meguri,
+  Shape,
+  Tone,
   Nori,
   Oora,
   PublicParams,
@@ -74,6 +76,18 @@ export const UI_TO_PARAMS = {
     HEAVY: 65,
     FLOAT: 90,
   } satisfies Record<Iro, number>,
+  tone: {
+    WARM: 10,
+    OPEN: 35,
+    BRIGHT: 70,
+    DUSK: 90,
+  } satisfies Record<Tone, number>,
+  shape: {
+    SOFT: 10,
+    ROUND: 35,
+    TIGHT: 70,
+    SHARP: 90,
+  } satisfies Record<Shape, number>,
 } as const;
 
 export type UiState = {
@@ -85,6 +99,8 @@ export type UiState = {
   kazari: Kazari;
   kizami: Kizami;
   iro: Iro;
+  tone: Tone;
+  shape: Shape;
 };
 
 export function nearestLabel<T extends string>(value: number, table: Record<T, number>): T {
@@ -105,6 +121,8 @@ export function uiToBfhaParams(ui: UiState, tane: number): BfhaParams {
     kazari: UI_TO_PARAMS.kazari[ui.kazari],
     kizami: UI_TO_PARAMS.kizami[ui.kizami],
     iro: UI_TO_PARAMS.iro[ui.iro],
+    tone: UI_TO_PARAMS.tone[ui.tone],
+    shape: UI_TO_PARAMS.shape[ui.shape],
   };
 }
 
@@ -118,6 +136,8 @@ export function paramsToUi(params: BfhaParams): UiState {
     kazari: nearestLabel(params.kazari, UI_TO_PARAMS.kazari),
     kizami: nearestLabel(params.kizami, UI_TO_PARAMS.kizami),
     iro: nearestLabel(params.iro, UI_TO_PARAMS.iro),
+    tone: nearestLabel(params.tone, UI_TO_PARAMS.tone),
+    shape: nearestLabel(params.shape, UI_TO_PARAMS.shape),
   };
 }
 
@@ -136,7 +156,7 @@ export function paramToBars(value: number): number {
 
 export function publicParamsToUi(
   publicParams: PublicParams,
-  extras: Pick<UiState, 'nori' | 'kazari' | 'kizami' | 'iro'>,
+  extras: Pick<UiState, 'nori' | 'kazari' | 'kizami' | 'iro' | 'tone' | 'shape'>,
 ): UiState {
   return {
     ...publicParams,

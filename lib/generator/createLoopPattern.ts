@@ -23,6 +23,12 @@ export type TonePalette = {
   bassDuration: number;
   masterGain: number;
   noiseCutoff: number;
+  leadAttack: number;
+  leadRelease: number;
+  bassAttack: number;
+  bassRelease: number;
+  harmonyAttack: number;
+  harmonyRelease: number;
 };
 
 export type LoopPattern = {
@@ -109,51 +115,51 @@ function bassRoots(scale: string[], bars: number): string[] {
 }
 
 function paletteFromInternal(internalParams: InternalParams): TonePalette {
-  if (internalParams.iro === 'HEAVY') {
-    return {
-      leadType: 'sawtooth',
-      harmonyType: 'square',
-      bassType: 'triangle',
-      leadDuration: 0.14,
-      harmonyDuration: 0.09,
-      bassDuration: 0.22,
-      masterGain: 0.74,
-      noiseCutoff: 1500,
-    };
-  }
-  if (internalParams.iro === 'CRISP') {
-    return {
-      leadType: 'sawtooth',
-      harmonyType: 'square',
-      bassType: 'triangle',
-      leadDuration: 0.08,
-      harmonyDuration: 0.06,
-      bassDuration: 0.16,
-      masterGain: 0.74,
-      noiseCutoff: 2800,
-    };
-  }
-  if (internalParams.iro === 'FLOAT') {
-    return {
-      leadType: 'sine',
-      harmonyType: 'triangle',
-      bassType: 'triangle',
-      leadDuration: 0.22,
-      harmonyDuration: 0.16,
-      bassDuration: 0.24,
-      masterGain: 0.72,
-      noiseCutoff: 3200,
-    };
-  }
+  const toneCutoff =
+    internalParams.tone === 'WARM'
+      ? 1500
+      : internalParams.tone === 'OPEN'
+        ? 2200
+        : internalParams.tone === 'BRIGHT'
+          ? 3400
+          : 1100;
+
+  const noiseCutoff =
+    internalParams.tone === 'WARM'
+      ? 1200
+      : internalParams.tone === 'OPEN'
+        ? 1900
+        : internalParams.tone === 'BRIGHT'
+          ? 3000
+          : 900;
+
+  const shape =
+    internalParams.shape === 'SOFT'
+      ? { attack: 0.016, release: 0.22, bassAttack: 0.018, bassRelease: 0.26 }
+      : internalParams.shape === 'ROUND'
+        ? { attack: 0.01, release: 0.18, bassAttack: 0.014, bassRelease: 0.22 }
+        : internalParams.shape === 'TIGHT'
+          ? { attack: 0.006, release: 0.12, bassAttack: 0.01, bassRelease: 0.18 }
+          : { attack: 0.004, release: 0.09, bassAttack: 0.008, bassRelease: 0.16 };
+
+  const base = internalParams.iro === 'HEAVY'
+    ? { leadType: 'sawtooth' as OscillatorType, harmonyType: 'square' as OscillatorType, bassType: 'triangle' as OscillatorType, leadDuration: 0.14, harmonyDuration: 0.09, bassDuration: 0.22, masterGain: 0.74 }
+    : internalParams.iro === 'CRISP'
+      ? { leadType: 'sawtooth' as OscillatorType, harmonyType: 'square' as OscillatorType, bassType: 'triangle' as OscillatorType, leadDuration: 0.08, harmonyDuration: 0.06, bassDuration: 0.16, masterGain: 0.74 }
+      : internalParams.iro === 'FLOAT'
+        ? { leadType: 'sine' as OscillatorType, harmonyType: 'triangle' as OscillatorType, bassType: 'triangle' as OscillatorType, leadDuration: 0.22, harmonyDuration: 0.16, bassDuration: 0.24, masterGain: 0.72 }
+        : { leadType: 'square' as OscillatorType, harmonyType: 'square' as OscillatorType, bassType: 'triangle' as OscillatorType, leadDuration: 0.12, harmonyDuration: 0.08, bassDuration: 0.18, masterGain: 0.7 };
+
   return {
-    leadType: 'square',
-    harmonyType: 'square',
-    bassType: 'triangle',
-    leadDuration: 0.12,
-    harmonyDuration: 0.08,
-    bassDuration: 0.18,
-    masterGain: 0.7,
-    noiseCutoff: 1800,
+    ...base,
+    toneCutoff,
+    noiseCutoff,
+    leadAttack: shape.attack,
+    leadRelease: shape.release,
+    harmonyAttack: Math.max(0.004, shape.attack * 0.8),
+    harmonyRelease: Math.max(0.08, shape.release * 0.9),
+    bassAttack: shape.bassAttack,
+    bassRelease: shape.bassRelease,
   };
 }
 

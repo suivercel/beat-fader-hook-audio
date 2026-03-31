@@ -4,6 +4,8 @@ export type Tenpo = 'SLOW' | 'MID-SLOW' | 'MID' | 'MID-FAST' | 'FAST';
 export type Meguri = 'SHORT' | 'MID' | 'LONG';
 
 export type Iro = 'CLEAR' | 'CRISP' | 'HEAVY' | 'FLOAT';
+export type Tone = 'WARM' | 'OPEN' | 'BRIGHT' | 'DUSK';
+export type Shape = 'SOFT' | 'ROUND' | 'TIGHT' | 'SHARP';
 export type Kuse = 'STRAIGHT' | 'JUMP' | 'WAVE' | 'SHARP';
 export type Nori = 'STEP' | 'PUSH' | 'SWING' | 'BREAK';
 export type Kazari = 'NONE' | 'LIGHT' | 'MID' | 'RICH';
@@ -20,6 +22,8 @@ export type PublicParams = {
 export type InternalParams = {
   tane: number;
   iro: Iro;
+  tone: Tone;
+  shape: Shape;
   kuse: Kuse;
   nori: Nori;
   kazari: Kazari;
@@ -58,6 +62,8 @@ export type BfhaParams = {
   kazari: number;
   kizami: number;
   iro: number;
+  tone: number;
+  shape: number;
 };
 
 export type BfhaRenderNote = {

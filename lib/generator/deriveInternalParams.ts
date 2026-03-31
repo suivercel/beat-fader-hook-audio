@@ -6,6 +6,8 @@ import type {
   Nori,
   Kazari,
   Kizami,
+  Tone,
+  Shape,
   Yuragi,
 } from '@/lib/types/music';
 
@@ -27,6 +29,24 @@ export function deriveInternalParams(
         : oora === 'DARK'
           ? chooseBySeed(tane, ['CRISP', 'HEAVY'] as const)
           : 'HEAVY';
+
+  const tone: Tone =
+    oora === 'CALM'
+      ? 'WARM'
+      : oora === 'BRIGHT'
+        ? 'OPEN'
+        : oora === 'DARK'
+          ? 'DUSK'
+          : 'BRIGHT';
+
+  const shape: Shape =
+    ikioi === 'LOW'
+      ? 'SOFT'
+      : ikioi === 'MID'
+        ? 'ROUND'
+        : ikioi === 'HIGH'
+          ? 'TIGHT'
+          : 'SHARP';
 
   const kuse: Kuse =
     meguri === 'SHORT'
@@ -70,6 +90,8 @@ export function deriveInternalParams(
   return {
     tane,
     iro,
+    tone,
+    shape,
     kuse,
     nori,
     kazari,

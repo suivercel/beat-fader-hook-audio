@@ -11,6 +11,8 @@ import { deriveInternalParams } from '@/lib/generator/deriveInternalParams';
 import type {
   Ikioi,
   Iro,
+  Shape,
+  Tone,
   Kazari,
   Kizami,
   Meguri,
@@ -29,6 +31,8 @@ const NORI_VALUES: Nori[] = ['STEP', 'PUSH', 'SWING', 'BREAK'];
 const KAZARI_VALUES: Kazari[] = ['NONE', 'LIGHT', 'MID', 'RICH'];
 const KIZAMI_VALUES: Kizami[] = ['LOW', 'MID', 'HIGH', 'PEAK'];
 const IRO_VALUES: Iro[] = ['CLEAR', 'CRISP', 'HEAVY', 'FLOAT'];
+const TONE_VALUES: Tone[] = ['WARM', 'OPEN', 'BRIGHT', 'DUSK'];
+const SHAPE_VALUES: Shape[] = ['SOFT', 'ROUND', 'TIGHT', 'SHARP'];
 
 const BPM_BY_TENPO: Record<Tenpo, number> = {
   SLOW: 96,
@@ -82,6 +86,8 @@ export default function HomePage() {
   const [kazari, setKazari] = useState<Kazari>('LIGHT');
   const [kizami, setKizami] = useState<Kizami>('MID');
   const [iro, setIro] = useState<Iro>('CLEAR');
+  const [tone, setTone] = useState<Tone>('OPEN');
+  const [shape, setShape] = useState<Shape>('ROUND');
   const engineRef = useRef<SimpleAudioEngine | null>(null);
 
   const baseInternalParams = useMemo(() => deriveInternalParams(publicParams, tane), [publicParams, tane]);
@@ -94,8 +100,10 @@ export default function HomePage() {
         kazari,
         kizami,
         iro,
+        tone,
+        shape,
       }),
-    [publicParams, nori, kazari, kizami, iro],
+    [publicParams, nori, kazari, kizami, iro, tone, shape],
   );
 
   const internalParams = useMemo(
@@ -105,8 +113,10 @@ export default function HomePage() {
       kazari,
       kizami,
       iro,
+      tone,
+      shape,
     }),
-    [baseInternalParams, nori, kazari, kizami, iro],
+    [baseInternalParams, nori, kazari, kizami, iro, tone, shape],
   );
 
   const pattern = useMemo(() => createLoopPattern(publicParams, internalParams), [publicParams, internalParams]);
@@ -147,7 +157,7 @@ export default function HomePage() {
     const tokenData = buildBfhaTokenData({
       params,
       pattern,
-      title: `BFHA Loop ${tane}`,
+      title: `Bit8 Fader Hook Audio Loop ${tane}`,
       createdAt: new Date().toISOString(),
     });
 
@@ -155,7 +165,7 @@ export default function HomePage() {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = `bfha-loop-${tane}.json`;
+    anchor.download = `bit8-fader-hook-audio-${tane}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
   };
@@ -194,8 +204,8 @@ export default function HomePage() {
       <div className="shell">
         <div className="headerRow">
           <div>
-            <div className="eyebrow">Mix Beats. Mint Sound.</div>
-            <h1 className="title">Beat Fader Hook Audio</h1>
+            <div className="eyebrow">Mix Bits. Mint Sound.</div>
+            <h1 className="title">Bit8 Fader Hook Audio</h1>
           </div>
           <div className="pillRow">
             <div className="pill">TANE: {tane}</div>
@@ -225,6 +235,8 @@ export default function HomePage() {
               <MiniToggleGroup label="KAZARI" values={KAZARI_VALUES} activeValue={kazari} onSelect={setKazari} />
               <MiniToggleGroup label="KIZAMI" values={KIZAMI_VALUES} activeValue={kizami} onSelect={setKizami} />
               <MiniToggleGroup label="IRO" values={IRO_VALUES} activeValue={iro} onSelect={setIro} />
+              <MiniToggleGroup label="TONE" values={TONE_VALUES} activeValue={tone} onSelect={setTone} />
+              <MiniToggleGroup label="SHAPE" values={SHAPE_VALUES} activeValue={shape} onSelect={setShape} />
             </div>
 
             <section className="actionsPanel">
