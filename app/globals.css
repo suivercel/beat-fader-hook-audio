@@ -344,24 +344,6 @@ a {
             animation: bfhaKnobValuePulse var(--bfha-beat, 0.5s) ease-in-out infinite;
           }
 
-          .knobGridActive .knobCardButton:nth-child(2) .knobFace,
-          .knobGridActive .knobCardButton:nth-child(2) .knobInnerRing,
-          .knobGridActive .knobCardButton:nth-child(2) .knobValue {
-            animation-delay: calc(var(--bfha-beat, 0.5s) * -0.12);
-          }
-
-          .knobGridActive .knobCardButton:nth-child(3) .knobFace,
-          .knobGridActive .knobCardButton:nth-child(3) .knobInnerRing,
-          .knobGridActive .knobCardButton:nth-child(3) .knobValue {
-            animation-delay: calc(var(--bfha-beat, 0.5s) * -0.24);
-          }
-
-          .knobGridActive .knobCardButton:nth-child(4) .knobFace,
-          .knobGridActive .knobCardButton:nth-child(4) .knobInnerRing,
-          .knobGridActive .knobCardButton:nth-child(4) .knobValue {
-            animation-delay: calc(var(--bfha-beat, 0.5s) * -0.36);
-          }
-
           .miniGrid {
             grid-template-columns: 1fr 1fr;
             gap: 10px;
