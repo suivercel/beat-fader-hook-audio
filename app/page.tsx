@@ -214,8 +214,8 @@ export default function HomePage() {
         </div>
 
         <div className="contentGrid">
-          <section className="mainPanel">
-            <div className={`turntableWrap ${isPlaying ? 'turntableActive' : ''}`} style={turntableStyle}>
+          <section className="mainPanel" style={turntableStyle}>
+            <div className={`turntableWrap ${isPlaying ? 'turntableActive' : ''}`}>
               <div className="ring ring0" />
               <div className="ring ring1" />
               <div className="ring ring2" />
@@ -224,7 +224,7 @@ export default function HomePage() {
               <div className="centerHub" />
             </div>
 
-            <div className="knobGrid">
+            <div className={`knobGrid ${isPlaying ? 'knobGridActive' : ''}`}>
               {knobs.map((knob) => (
                 <KnobCard key={knob.label} label={knob.label} value={knob.value} onClick={knob.onClick} />
               ))}
