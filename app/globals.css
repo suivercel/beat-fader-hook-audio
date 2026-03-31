@@ -332,16 +332,22 @@ a {
             gap: 8px;
           }
 
-          .knobGridActive .knobFace {
-            animation: bfhaKnobPulse var(--bfha-beat, 0.5s) ease-in-out infinite;
+          .knobGridActive .knobFace,
+          .knobGrid.knobGridActive .knobFace {
+            animation: bfhaKnobPulse var(--bfha-beat, 0.5s) ease-in-out infinite !important;
+            animation-delay: 0s !important;
           }
 
-          .knobGridActive .knobInnerRing {
-            animation: bfhaKnobRingPulse var(--bfha-beat, 0.5s) ease-in-out infinite;
+          .knobGridActive .knobInnerRing,
+          .knobGrid.knobGridActive .knobInnerRing {
+            animation: bfhaKnobRingPulse var(--bfha-beat, 0.5s) ease-in-out infinite !important;
+            animation-delay: 0s !important;
           }
 
-          .knobGridActive .knobValue {
-            animation: bfhaKnobValuePulse var(--bfha-beat, 0.5s) ease-in-out infinite;
+          .knobGridActive .knobValue,
+          .knobGrid.knobGridActive .knobValue {
+            animation: bfhaKnobValuePulse var(--bfha-beat, 0.5s) ease-in-out infinite !important;
+            animation-delay: 0s !important;
           }
 
           .miniGrid {
